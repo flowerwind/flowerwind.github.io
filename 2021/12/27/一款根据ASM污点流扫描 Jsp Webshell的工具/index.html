@@ -45,7 +45,7 @@
 <meta property="og:image" content="http://example.com/2021/12/27/%E4%B8%80%E6%AC%BE%E6%A0%B9%E6%8D%AEASM%E6%B1%A1%E7%82%B9%E6%B5%81%E6%89%AB%E6%8F%8F%20Jsp%20Webshell%E7%9A%84%E5%B7%A5%E5%85%B7/image-20211227222254050.png">
 <meta property="og:image" content="http://example.com/2021/12/27/%E4%B8%80%E6%AC%BE%E6%A0%B9%E6%8D%AEASM%E6%B1%A1%E7%82%B9%E6%B5%81%E6%89%AB%E6%8F%8F%20Jsp%20Webshell%E7%9A%84%E5%B7%A5%E5%85%B7/image-20211227221722670.png">
 <meta property="article:published_time" content="2021-12-27T09:08:27.000Z">
-<meta property="article:modified_time" content="2022-01-08T06:39:21.226Z">
+<meta property="article:modified_time" content="2022-01-08T06:42:22.356Z">
 <meta property="article:author" content="huahua">
 <meta property="article:tag" content="安全工具">
 <meta name="twitter:card" content="summary">
@@ -205,7 +205,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>之前浏览先知的时候看到了4ra1n师傅的一篇文章<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/10622">《基于污点分析的JSP Webshell检测》</a>，觉得写的很好，之前在看三梦师傅的<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7058#toc-5">《java反序列化利用链自动挖掘工具gadgetinspector源码浅析》</a>，其中用到技术也是asm污点跟踪，当时看了很多遍都没看明白。这次在4ra1n师傅发表过关于asm污点跟踪的文章后我决定以该文章为起点，再重新学习一下这方面的知识。出于安服仔的实用性考虑，在对<a target="_blank" rel="noopener" href="https://github.com/EmYiQing/JSPKiller/%E8%BF%9B%E8%A1%8C%E7%A0%94%E7%A9%B6%E5%90%8E%E5%8F%91%E7%8E%B0%E4%BA%86%E8%AF%A5%E5%B7%A5%E5%85%B7%E5%8F%AF%E9%80%82%E7%94%A8%E4%BA%8E%E5%AE%9E%E9%AA%8C%E5%AE%A4%E7%8E%AF%E5%A2%83%EF%BC%8C%E4%BD%86%E5%8F%AF%E8%83%BD%E6%97%A0%E6%B3%95%E8%BE%83%E5%A5%BD%E7%9A%84%E8%BF%90%E7%94%A8%E4%BA%8E%E7%9C%9F%E5%AE%9E%E6%94%BB%E9%98%B2%E5%9C%BA%E6%99%AF%EF%BC%8C%E4%BA%8E%E6%98%AF%E5%86%B3%E5%AE%9A%E8%AE%BE%E8%AE%A1%E4%B8%80%E6%AC%BE%E5%90%8C%E6%A0%B7%E4%BE%9D%E6%8D%AEasm%E6%B1%A1%E7%82%B9%E8%B7%9F%E8%B8%AA%E7%9A%84jsp">https://github.com/EmYiQing/JSPKiller/进行研究后发现了该工具可适用于实验室环境，但可能无法较好的运用于真实攻防场景，于是决定设计一款同样依据asm污点跟踪的jsp</a> webshell查找工具—JspFinder。虽然都是asm污点跟踪，但运转逻辑却和JSPKillder不大相同。接下来进入正文。</p>
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>之前浏览先知的时候看到了4ra1n师傅的一篇文章<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/10622">《基于污点分析的JSP Webshell检测》</a>，觉得写的很好，之前在看三梦师傅的<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7058#toc-5">《java反序列化利用链自动挖掘工具gadgetinspector源码浅析》</a>，其中用到技术也是asm污点跟踪，当时看了很多遍都没看明白。这次在4ra1n师傅发表过关于asm污点跟踪的文章后我决定以该文章为起点，再重新学习一下这方面的知识。出于安服仔的实用性考虑，在对<a target="_blank" rel="noopener" href="https://github.com/EmYiQing/JSPKiller/">https://github.com/EmYiQing/JSPKiller/</a> 进行研究后发现了该工具可适用于实验室环境，但可能无法较好的运用于真实攻防场景，于是决定设计一款同样依据asm污点跟踪的jsp webshell查找工具—JspFinder。虽然都是asm污点跟踪，但运转逻辑却和JSPKillder不大相同。接下来进入正文。</p>
 <span id="more"></span>
 
 <h3 id="使用方式"><a href="#使用方式" class="headerlink" title="使用方式"></a>使用方式</h3><p>-d 指定需要扫描的web目录，这是一定需要添加的参数，因为编译jsp需要依赖项目的jar包，所以单独指定一个jsp可能编译会报错，因此需要指定一个web目录</p>
