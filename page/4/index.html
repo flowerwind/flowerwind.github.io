@@ -154,19 +154,173 @@
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-ysoserial学习之CommonsCollections3" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-ysoserialѧϰ֮CommonsCollections5" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections3/">ysoserial学习之CommonsCollections3</a>
+      <a class="article-title" href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AECommonsCollections5/">ysoserial学习之CommonsCollections5</a>
     </h1>
   
 
         
-        <a href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections3/" class="archive-article-date">
+        <a href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AECommonsCollections5/" class="archive-article-date">
+  	<time datetime="2021-05-01T07:58:23.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-01</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>CommonCollections系列的gadgets我们在反序列化利用中用的很多，下面剖析一下ysoserial中CommonCollections5的调用链和原理。</p>
+<p>实验环境:jdk1.8.0_211、commons-collections:commons-collections:3.1</p>
+        
+          <a class="article-more-a" href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AECommonsCollections5/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">ysoserial学习</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AECommonsCollections5/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-ysoserialѧϰ֮CommonsCollections4" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AECommonsCollections4/">ysoserial学习之CommonsCollections4</a>
+    </h1>
+  
+
+        
+        <a href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AECommonsCollections4/" class="archive-article-date">
+  	<time datetime="2021-05-01T07:57:19.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-01</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>CommonCollections系列的gadgets之CommonsCollections4</p>
+<p>实验环境:jdk1.8.0_211、org.apache.commons:commons-collections4:4.0</p>
+        
+          <a class="article-more-a" href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AECommonsCollections4/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">ysoserial学习</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AECommonsCollections4/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-ysoserialѧϰ֮CommonsCollections3" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AECommonsCollections3/">ysoserial学习之CommonsCollections3</a>
+    </h1>
+  
+
+        
+        <a href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AECommonsCollections3/" class="archive-article-date">
   	<time datetime="2021-05-01T07:56:22.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-01</time>
 </a>
         
@@ -177,7 +331,7 @@
         <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>CommonCollections系列的gadgets之CommonsCollections3</p>
 <p>实验环境:jdk1.7.0_80、commons-collections:commons-collections:3.1</p>
         
-          <a class="article-more-a" href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections3/#more">more >></a>
+          <a class="article-more-a" href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AECommonsCollections3/#more">more >></a>
         
       
 
@@ -201,7 +355,7 @@
 
       
         <p class="article-more-link">
-          <a class="article-more-a" href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections3/">展开全文 >></a>
+          <a class="article-more-a" href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AECommonsCollections3/">展开全文 >></a>
         </p>
       
 
@@ -231,19 +385,19 @@
 
 
   
-    <article id="post-ysoserial学习之CommonsCollections2" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-ysoserialѧϰ֮CommonsCollections2" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections2/">ysoserial学习之CommonsCollections2</a>
+      <a class="article-title" href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AECommonsCollections2/">ysoserial学习之CommonsCollections2</a>
     </h1>
   
 
         
-        <a href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections2/" class="archive-article-date">
+        <a href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AECommonsCollections2/" class="archive-article-date">
   	<time datetime="2021-05-01T07:55:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-01</time>
 </a>
         
@@ -254,7 +408,7 @@
         <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>CommonCollections系列的gadgets之CommonsCollections2</p>
 <p>实验环境:jdk1.8.0_211 、org.apache.commons:commons-collections4:4.0</p>
         
-          <a class="article-more-a" href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections2/#more">more >></a>
+          <a class="article-more-a" href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AECommonsCollections2/#more">more >></a>
         
       
 
@@ -278,7 +432,7 @@
 
       
         <p class="article-more-link">
-          <a class="article-more-a" href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections2/">展开全文 >></a>
+          <a class="article-more-a" href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AECommonsCollections2/">展开全文 >></a>
         </p>
       
 
@@ -308,19 +462,19 @@
 
 
   
-    <article id="post-ysoserial学习之CommonsCollections1" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-ysoserialѧϰ֮CommonsCollections1" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections1/">ysoserial学习之CommonsCollections1</a>
+      <a class="article-title" href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AECommonsCollections1/">ysoserial学习之CommonsCollections1</a>
     </h1>
   
 
         
-        <a href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections1/" class="archive-article-date">
+        <a href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AECommonsCollections1/" class="archive-article-date">
   	<time datetime="2021-05-01T07:53:35.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-01</time>
 </a>
         
@@ -331,7 +485,7 @@
         <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>CommonCollections系列的gadgets我们在反序列化利用中用的很多，下面剖析一下ysoserial中CommonCollections1的调用链和原理。</p>
 <p>实验环境:jdk1.7.0_80、commons-collections:commons-collections:3.1</p>
         
-          <a class="article-more-a" href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections1/#more">more >></a>
+          <a class="article-more-a" href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AECommonsCollections1/#more">more >></a>
         
       
 
@@ -355,7 +509,7 @@
 
       
         <p class="article-more-link">
-          <a class="article-more-a" href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BCommonsCollections1/">展开全文 >></a>
+          <a class="article-more-a" href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AECommonsCollections1/">展开全文 >></a>
         </p>
       
 
@@ -385,19 +539,19 @@
 
 
   
-    <article id="post-ysoserial学习之FileUpload" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-ysoserialѧϰ֮FileUpload" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/">ysoserial学习之FileUpload</a>
+      <a class="article-title" href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AEFileUpload/">ysoserial学习之FileUpload</a>
     </h1>
   
 
         
-        <a href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/" class="archive-article-date">
+        <a href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AEFileUpload/" class="archive-article-date">
   	<time datetime="2021-05-01T07:46:02.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-01</time>
 </a>
         
@@ -408,7 +562,7 @@
         <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>FileUpload1</p>
 <p>实验环境:jdk1.8.0_211、commons-fileupload:commons-fileupload:1.3.1、commons-io:commons-io:2.4</p>
         
-          <a class="article-more-a" href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/#more">more >></a>
+          <a class="article-more-a" href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AEFileUpload/#more">more >></a>
         
       
 
@@ -432,7 +586,7 @@
 
       
         <p class="article-more-link">
-          <a class="article-more-a" href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BFileUpload/">展开全文 >></a>
+          <a class="article-more-a" href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AEFileUpload/">展开全文 >></a>
         </p>
       
 
@@ -493,6 +647,71 @@
     <div class="article-info article-info-index">
       
       
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-ysoserialѧϰ֮URLDNS" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AEURLDNS/">ysoserial学习之URLDNS</a>
+    </h1>
+  
+
+        
+        <a href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AEURLDNS/" class="archive-article-date">
+  	<time datetime="2021-05-01T05:33:16.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-01</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>URLDNS这个gadgets得主要做用为dns外联到dnslog中，在dnslog中得到回显以此来判断目标是否存在漏洞。下面分析一下这条链得原理。</p>
+        
+          <a class="article-more-a" href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AEURLDNS/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -508,7 +727,7 @@
 
       
         <p class="article-more-link">
-          <a class="article-more-a" href="/2021/05/01/ysoserial%E5%AD%A6%E4%B9%A0%E4%B9%8BURLDNS/">展开全文 >></a>
+          <a class="article-more-a" href="/2021/05/01/ysoserial%D1%A7%CF%B0%D6%AEURLDNS/">展开全文 >></a>
         </p>
       
 
