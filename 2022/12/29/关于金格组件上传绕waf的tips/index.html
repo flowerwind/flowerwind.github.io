@@ -8,28 +8,28 @@
   <link rel="dns-prefetch" href="http://example.com">
   <title>关于金格组件上传绕waf的tips | huahua&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="前言一次项目实战遇到了金格文件上传的漏洞，漏洞点存在，不过数据包被waf拦截了。本文主要介绍实战绕过这次waf的过程。 确认拦截点首先贴出post数据 12345DBSTEP V3.0     76              0               24              DBSTEP&#x3D;REJTVEVQOPTION&#x3D;U0FWRUZJTEU&#x3D;RECORD">
+  <meta name="description" content="前言一次项目实战遇到了金格文件上传的漏洞，漏洞点存在，不过数据包被waf拦截了。本文主要介绍实战绕过这次waf的过程。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="关于金格组件上传绕waf的tips">
 <meta property="og:url" content="http://example.com/2022/12/29/%E5%85%B3%E4%BA%8E%E9%87%91%E6%A0%BC%E7%BB%84%E4%BB%B6%E4%B8%8A%E4%BC%A0%E7%BB%95waf%E7%9A%84tips/index.html">
 <meta property="og:site_name" content="huahua&#39;s Blog">
-<meta property="og:description" content="前言一次项目实战遇到了金格文件上传的漏洞，漏洞点存在，不过数据包被waf拦截了。本文主要介绍实战绕过这次waf的过程。 确认拦截点首先贴出post数据 12345DBSTEP V3.0     76              0               24              DBSTEP&#x3D;REJTVEVQOPTION&#x3D;U0FWRUZJTEU&#x3D;RECORD">
+<meta property="og:description" content="前言一次项目实战遇到了金格文件上传的漏洞，漏洞点存在，不过数据包被waf拦截了。本文主要介绍实战绕过这次waf的过程。">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://example.com/Users/huhuahua/%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/%E6%8A%95%E7%A8%BF%E6%96%87%E7%AB%A0/images/image-20220905174648672.png">
-<meta property="og:image" content="http://example.com/Users/huhuahua/%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/%E6%8A%95%E7%A8%BF%E6%96%87%E7%AB%A0/images/image-20220905175346447.png">
-<meta property="og:image" content="http://example.com/Users/huhuahua/%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/%E6%8A%95%E7%A8%BF%E6%96%87%E7%AB%A0/images/image-20220905175803028.png">
-<meta property="og:image" content="http://example.com/Users/huhuahua/%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/%E6%8A%95%E7%A8%BF%E6%96%87%E7%AB%A0/images/image-20220905180328561.png">
-<meta property="og:image" content="http://example.com/Users/huhuahua/%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/%E6%8A%95%E7%A8%BF%E6%96%87%E7%AB%A0/images/image-20220905180456520.png">
-<meta property="og:image" content="http://example.com/Users/huhuahua/%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/%E6%8A%95%E7%A8%BF%E6%96%87%E7%AB%A0/images/image-20220905181511430.png">
-<meta property="og:image" content="http://example.com/Users/huhuahua/%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/%E6%8A%95%E7%A8%BF%E6%96%87%E7%AB%A0/images/image-20220905182028622.png">
-<meta property="og:image" content="http://example.com/Users/huhuahua/%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/%E6%8A%95%E7%A8%BF%E6%96%87%E7%AB%A0/images/image-20220905183211698.png">
-<meta property="og:image" content="http://example.com/Users/huhuahua/%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/%E6%8A%95%E7%A8%BF%E6%96%87%E7%AB%A0/images/image-20220905183414227.png">
+<meta property="og:image" content="http://example.com/2022/12/29/%E5%85%B3%E4%BA%8E%E9%87%91%E6%A0%BC%E7%BB%84%E4%BB%B6%E4%B8%8A%E4%BC%A0%E7%BB%95waf%E7%9A%84tips/image-20220905174648672.png">
+<meta property="og:image" content="http://example.com/2022/12/29/%E5%85%B3%E4%BA%8E%E9%87%91%E6%A0%BC%E7%BB%84%E4%BB%B6%E4%B8%8A%E4%BC%A0%E7%BB%95waf%E7%9A%84tips/image-20220905175346447.png">
+<meta property="og:image" content="http://example.com/2022/12/29/%E5%85%B3%E4%BA%8E%E9%87%91%E6%A0%BC%E7%BB%84%E4%BB%B6%E4%B8%8A%E4%BC%A0%E7%BB%95waf%E7%9A%84tips/image-20220905175803028.png">
+<meta property="og:image" content="http://example.com/2022/12/29/%E5%85%B3%E4%BA%8E%E9%87%91%E6%A0%BC%E7%BB%84%E4%BB%B6%E4%B8%8A%E4%BC%A0%E7%BB%95waf%E7%9A%84tips/image-20220905180328561.png">
+<meta property="og:image" content="http://example.com/2022/12/29/%E5%85%B3%E4%BA%8E%E9%87%91%E6%A0%BC%E7%BB%84%E4%BB%B6%E4%B8%8A%E4%BC%A0%E7%BB%95waf%E7%9A%84tips/image-20220905180456520.png">
+<meta property="og:image" content="http://example.com/2022/12/29/%E5%85%B3%E4%BA%8E%E9%87%91%E6%A0%BC%E7%BB%84%E4%BB%B6%E4%B8%8A%E4%BC%A0%E7%BB%95waf%E7%9A%84tips/image-20220905181511430.png">
+<meta property="og:image" content="http://example.com/2022/12/29/%E5%85%B3%E4%BA%8E%E9%87%91%E6%A0%BC%E7%BB%84%E4%BB%B6%E4%B8%8A%E4%BC%A0%E7%BB%95waf%E7%9A%84tips/image-20220905182028622.png">
+<meta property="og:image" content="http://example.com/2022/12/29/%E5%85%B3%E4%BA%8E%E9%87%91%E6%A0%BC%E7%BB%84%E4%BB%B6%E4%B8%8A%E4%BC%A0%E7%BB%95waf%E7%9A%84tips/image-20220905183211698.png">
+<meta property="og:image" content="http://example.com/2022/12/29/%E5%85%B3%E4%BA%8E%E9%87%91%E6%A0%BC%E7%BB%84%E4%BB%B6%E4%B8%8A%E4%BC%A0%E7%BB%95waf%E7%9A%84tips/image-20220905183414227.png">
 <meta property="article:published_time" content="2022-12-29T03:30:59.000Z">
-<meta property="article:modified_time" content="2022-12-29T03:33:51.873Z">
+<meta property="article:modified_time" content="2022-12-29T04:40:53.518Z">
 <meta property="article:author" content="huahua">
 <meta property="article:tag" content="java相关">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/Users/huhuahua/%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/%E6%8A%95%E7%A8%BF%E6%96%87%E7%AB%A0/images/image-20220905174648672.png">
+<meta name="twitter:image" content="http://example.com/2022/12/29/%E5%85%B3%E4%BA%8E%E9%87%91%E6%A0%BC%E7%BB%84%E4%BB%B6%E4%B8%8A%E4%BC%A0%E7%BB%95waf%E7%9A%84tips/image-20220905174648672.png">
   
     <link rel="alternative" href="/atom.xml" title="huahua&#39;s Blog" type="application/atom+xml">
   
@@ -186,23 +186,25 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>一次项目实战遇到了金格文件上传的漏洞，漏洞点存在，不过数据包被waf拦截了。本文主要介绍实战绕过这次waf的过程。</p>
+<span id="more"></span>
+
 <h3 id="确认拦截点"><a href="#确认拦截点" class="headerlink" title="确认拦截点"></a>确认拦截点</h3><p>首先贴出post数据</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">DBSTEP V3.0     76              0               24              DBSTEP&#x3D;REJTVEVQ</span><br><span class="line">OPTION&#x3D;U0FWRUZJTEU&#x3D;</span><br><span class="line">RECORDID&#x3D;Li4v</span><br><span class="line">FILETYPE&#x3D;bG9nXzYuanNw</span><br><span class="line">&lt;%out.println(&quot;test&quot;);%&gt;</span><br></pre></td></tr></table></figure>
 
 <p>遇到waf首先确认该waf拦截了我们什么内容，一开始我以为是拦截了jsp的内容，在通过把jsp内容替换成如111111之类的纯文本之后，waf还是把我们的数据包拦截了。由此确认，这个waf并不是拦截了jsp内容。在通过对各段内容进行删除之后，确认了该waf拦截了DBSTEP这个字符串，waf的思路也很好理解，出现DBSTEP肯定是出现了金格上传，那么直接进行拦截。接下来的问题就是我们如何绕过对DBSTEP的拦截。</p>
 <h3 id="尝试绕过"><a href="#尝试绕过" class="headerlink" title="尝试绕过"></a>尝试绕过</h3><p>首先我讲POST数据包的POST改写成post，试图用畸形请求方式让waf不解析我的post内容，如下图所示。可惜目标中间件并不解析这种写法。</p>
-<p><img src="/Users/huhuahua/%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/%E6%8A%95%E7%A8%BF%E6%96%87%E7%AB%A0/images/image-20220905174648672.png" alt="image-20220905174648672"></p>
+<p><img src="/2022/12/29/%E5%85%B3%E4%BA%8E%E9%87%91%E6%A0%BC%E7%BB%84%E4%BB%B6%E4%B8%8A%E4%BC%A0%E7%BB%95waf%E7%9A%84tips/image-20220905174648672.png" alt="image-20220905174648672"></p>
 <p>于是我把POST请求改成了GET请求，试图干扰waf解析，让其把注意力关注在get传参上。不过最后也失败了，waf还是解析到了POST数据包内容。</p>
 <p>于是我转而考虑能否使用分快传输/延时分快传输，不过waf并没吃这套，照样把我拦截了。</p>
 <p>最终我想到了使用大量脏数据进行覆盖，而一般waf处于性能考虑，会对大量的数据进行截断解析，这时候放在大量脏数据后面的真正恶意payload就会不被waf解析到，导致绕过。最终确定这种方式是可行的，大致数据包是这样。(前面的a大概有几万个)</p>
-<p><img src="/Users/huhuahua/%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/%E6%8A%95%E7%A8%BF%E6%96%87%E7%AB%A0/images/image-20220905175346447.png" alt="image-20220905175346447"></p>
+<p><img src="/2022/12/29/%E5%85%B3%E4%BA%8E%E9%87%91%E6%A0%BC%E7%BB%84%E4%BB%B6%E4%B8%8A%E4%BC%A0%E7%BB%95waf%E7%9A%84tips/image-20220905175346447.png" alt="image-20220905175346447"></p>
 <p>经过这样的操作，我发现waf已经绕过了，但是目标金格并不解析我们的这种数据样式，因为这并不符合金格解析的规范。那么接下来的任务就是探究金格到底是如何解析数据以及最终上传的。</p>
 <h3 id="金格任意文件上传漏洞分析"><a href="#金格任意文件上传漏洞分析" class="headerlink" title="金格任意文件上传漏洞分析"></a>金格任意文件上传漏洞分析</h3><p>本地搭建环境，先看MsgObj.Load(request)这段代码</p>
-<p><img src="/Users/huhuahua/%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/%E6%8A%95%E7%A8%BF%E6%96%87%E7%AB%A0/images/image-20220905175803028.png" alt="image-20220905175803028"></p>
+<p><img src="/2022/12/29/%E5%85%B3%E4%BA%8E%E9%87%91%E6%A0%BC%E7%BB%84%E4%BB%B6%E4%B8%8A%E4%BC%A0%E7%BB%95waf%E7%9A%84tips/image-20220905175803028.png" alt="image-20220905175803028"></p>
 <p>跟入iMsgServer2000的Load方法</p>
-<p><img src="/Users/huhuahua/%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/%E6%8A%95%E7%A8%BF%E6%96%87%E7%AB%A0/images/image-20220905180328561.png" alt="image-20220905180328561"></p>
+<p><img src="/2022/12/29/%E5%85%B3%E4%BA%8E%E9%87%91%E6%A0%BC%E7%BB%84%E4%BB%B6%E4%B8%8A%E4%BC%A0%E7%BB%95waf%E7%9A%84tips/image-20220905180328561.png" alt="image-20220905180328561"></p>
 <p>在跟入1311行的this._$1027(request)</p>
-<p><img src="/Users/huhuahua/%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/%E6%8A%95%E7%A8%BF%E6%96%87%E7%AB%A0/images/image-20220905180456520.png" alt="image-20220905180456520"></p>
+<p><img src="/2022/12/29/%E5%85%B3%E4%BA%8E%E9%87%91%E6%A0%BC%E7%BB%84%E4%BB%B6%E4%B8%8A%E4%BC%A0%E7%BB%95waf%E7%9A%84tips/image-20220905180456520.png" alt="image-20220905180456520"></p>
 <p>我们看到，首先将request.getInputStream()的值赋给mRead对象，request.getInputStream()这个流就是http数据的post数据流。然后从mRead流中取了HeadSize长度的字节数组保存在HeadString中，HeadSize为64。到这里，HeadString的值为post数据包的前64个字符。</p>
 <p>接下来，HeadString的前16个字符赋给了this._$906</p>
 <p>HeadString的16-31个字符赋给了BodySize</p>
@@ -216,7 +218,7 @@
 <p>ErrorSize=0</p>
 <p>this._$907=24</p>
 <p>接着往下看金格的代码</p>
-<p><img src="/Users/huhuahua/%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/%E6%8A%95%E7%A8%BF%E6%96%87%E7%AB%A0/images/image-20220905181511430.png" alt="image-20220905181511430"></p>
+<p><img src="/2022/12/29/%E5%85%B3%E4%BA%8E%E9%87%91%E6%A0%BC%E7%BB%84%E4%BB%B6%E4%B8%8A%E4%BC%A0%E7%BB%95waf%E7%9A%84tips/image-20220905181511430.png" alt="image-20220905181511430"></p>
 <p>其从mRead数据流中继续读取数据，长度为BodySize个，对应我们上面的payload就是76个。76个的长度正好是下面这串字符的长度（换行为\r\n）</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">DBSTEP&#x3D;REJTVEVQ</span><br><span class="line">OPTION&#x3D;U0FWRUZJTEU&#x3D;</span><br><span class="line">RECORDID&#x3D;Li4v</span><br><span class="line">FILETYPE&#x3D;bG9nXzYuanNw</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
@@ -225,12 +227,12 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;%out.println(&quot;test&quot;);%&gt;</span><br></pre></td></tr></table></figure>
 
 <p>也就是需要上传的文件内容</p>
-<p><img src="/Users/huhuahua/%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/%E6%8A%95%E7%A8%BF%E6%96%87%E7%AB%A0/images/image-20220905182028622.png" alt="image-20220905182028622"></p>
+<p><img src="/2022/12/29/%E5%85%B3%E4%BA%8E%E9%87%91%E6%A0%BC%E7%BB%84%E4%BB%B6%E4%B8%8A%E4%BC%A0%E7%BB%95waf%E7%9A%84tips/image-20220905182028622.png" alt="image-20220905182028622"></p>
 <p>自此MsgObj.Load(request)就分析完了，这里是金格对于数据解析的主要部分。接着往下看</p>
-<p><img src="/Users/huhuahua/%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/%E6%8A%95%E7%A8%BF%E6%96%87%E7%AB%A0/images/image-20220905183211698.png" alt="image-20220905183211698"></p>
+<p><img src="/2022/12/29/%E5%85%B3%E4%BA%8E%E9%87%91%E6%A0%BC%E7%BB%84%E4%BB%B6%E4%B8%8A%E4%BC%A0%E7%BB%95waf%E7%9A%84tips/image-20220905183211698.png" alt="image-20220905183211698"></p>
 <p>这个if语句获取了MsgObj.GetMsgByName(“DBSTEP”)的值看其是否等于DBSTEP，从注释也可以看到这是用于解析post数据是否为金格的合法包。</p>
 <p>跟入GetMsgByName方法</p>
-<p><img src="/Users/huhuahua/%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/%E6%8A%95%E7%A8%BF%E6%96%87%E7%AB%A0/images/image-20220905183414227.png" alt="image-20220905183414227"></p>
+<p><img src="/2022/12/29/%E5%85%B3%E4%BA%8E%E9%87%91%E6%A0%BC%E7%BB%84%E4%BB%B6%E4%B8%8A%E4%BC%A0%E7%BB%95waf%E7%9A%84tips/image-20220905183414227.png" alt="image-20220905183414227"></p>
 <p>可以看到其取值方式就是把入参拼接 = 赋给mFieldName，然后在this._$904中用index寻找mFieldName字符串获得一个起始点，起始点开始的下一个\r\n字符串位置为终点，截取起始点到终点的值。将该值Base64解码，就是该方法的返回值。这么说比较抽象，举个例子：如果仔细看之前的解析流程的话可以看到</p>
 <p>this._$904的值为</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">DBSTEP&#x3D;REJTVEVQ</span><br><span class="line">OPTION&#x3D;U0FWRUZJTEU&#x3D;</span><br><span class="line">RECORDID&#x3D;Li4v</span><br><span class="line">FILETYPE&#x3D;bG9nXzYuanNw</span><br><span class="line"></span><br></pre></td></tr></table></figure>
