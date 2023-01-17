@@ -154,6 +154,82 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-JDK-Xalan的XSLT整数截断漏洞利用构造" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/12/29/JDK-Xalan%E7%9A%84XSLT%E6%95%B4%E6%95%B0%E6%88%AA%E6%96%AD%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8%E6%9E%84%E9%80%A0/">JDK Xalan的XSLT整数截断漏洞利用构造</a>
+    </h1>
+  
+
+        
+        <a href="/2022/12/29/JDK-Xalan%E7%9A%84XSLT%E6%95%B4%E6%95%B0%E6%88%AA%E6%96%AD%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8%E6%9E%84%E9%80%A0/" class="archive-article-date">
+  	<time datetime="2022-12-29T06:24:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-12-29</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>Apache Flink最近有师傅披露了一个<a target="_blank" rel="noopener" href="https://tttang.com/archive/1854/">漏洞</a>，可以调用任意类的main方法，不过在披露中所利用到的类只有在jdk11以上才存在。这时我考虑的是，我们常见的jdk8种能否找到利用类。经过寻找后找到了com.sun.org.apache.xalan.internal.xsltc.cmdline.Compile的main方法，这个方法可以把xslt编译成class，让我想到了之前爆出来的CVE-2022-34169。这个漏洞可以是apache xalan在把xslt转换成class的时候存在溢出(使用的类是:org.apache.xalan.xslt.Process)，导致攻击者可以上传精心构造的恶意xslt，通过xalan转换后得到恶意的class，这个过程中，恶意的class会被实例化导致代码执行。通过一系列实践后我发现com.sun.org.apache.xalan.internal.xsltc.cmdline.Compile转换xslt和apache xalan是类似的，不过不同的是他没有实例化过程导致无法执行代码，虽然Flink这个漏洞利用没戏了，不过在这个中学习到了通过溢出来制作恶意class文件的技巧，还是收益匪浅的。后面又观察了一下，发现jdk中也有xalan的这个类(com.sun.org.apache.xalan.internal.xslt.Process)，同样也是和apache xalan一样也会溢出。我在使用thanat0s师傅在<a target="_blank" rel="noopener" href="https://blog.noah.360.net/xalan-j-integer-truncation-reproduce-cve-2022-34169/">文章</a>中使用的exp复现时，发现apache xalan确实可以成功的弹出计算器，不过我在使用jdk xalan时，生成的class是损坏的，当然也无法弹出计算器。因为实战中还是见到过jdk xalan解析xslt的代码的，为了方便以后遇到了直接能利用，所以准备把我把apache xalan的payload改造成jdk xalan的payload的过程记录下来。</p>
+        
+          <a class="article-more-a" href="/2022/12/29/JDK-Xalan%E7%9A%84XSLT%E6%95%B4%E6%95%B0%E6%88%AA%E6%96%AD%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8%E6%9E%84%E9%80%A0/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">漏洞利用</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/12/29/JDK-Xalan%E7%9A%84XSLT%E6%95%B4%E6%95%B0%E6%88%AA%E6%96%AD%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8%E6%9E%84%E9%80%A0/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-关于金格组件上传绕waf的tips" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -841,82 +917,6 @@
 
 
   
-    <article id="post-memshell源码解析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/">memshell源码解析</a>
-    </h1>
-  
-
-        
-        <a href="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-06-09T03:10:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-09</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>最近学习内存马，发现目前内存马主要集中在三个层面，1、原生的Servlet/Filter  2、框架封装的控制器 3、jvm层面(rebeyond的memshell，目前已集成在最新版冰蝎中)。前两种其实听的比较多，第三种听的比较少，研究了一下发现比较有意思，又学到了一个知识点。本文主要分析第三种内存马，以<a target="_blank" rel="noopener" href="https://github.com/rebeyond/memShell">memshell</a>工具为例。</p>
-        
-          <a class="article-more-a" href="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">工具分析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/">Next &amp;raquo;</a>
@@ -931,7 +931,7 @@
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2022 huahua
+    		&copy; 2023 huahua
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
@@ -1067,6 +1067,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">漏洞分析</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">漏洞利用</a>
               </li>
             
             <div class="clearfix"></div>
