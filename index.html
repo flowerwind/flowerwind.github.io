@@ -230,95 +230,6 @@
 
 
   
-    <article id="post-Shiro身份绕过漏洞-CVE-2023-22602-分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2023/01/30/Shiro%E8%BA%AB%E4%BB%BD%E7%BB%95%E8%BF%87%E6%BC%8F%E6%B4%9E-CVE-2023-22602-%E5%88%86%E6%9E%90/">Shiro身份绕过漏洞(CVE-2023-22602)分析</a>
-    </h1>
-  
-
-        
-        <a href="/2023/01/30/Shiro%E8%BA%AB%E4%BB%BD%E7%BB%95%E8%BF%87%E6%BC%8F%E6%B4%9E-CVE-2023-22602-%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2023-01-30T06:44:05.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-01-30</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>最近看到奇安信cert通报了shiro的权限绕过<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/VaABqdK9E1U4gYKcRqlmng">漏洞</a>，看描述是由于Apache Shiro与大于2.6版本的Spring Boot一起使用的时候，由于Shiro和Springboot使用不同的路径匹配模式导致的绕过。</p>
-<h3 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h3><p>​    根据Springboot官方手册，Springboot2.6版本以上将默认的路径匹配模式由AntPathMatcher改为PathPatternParser<img src="/Users/huhuahua/%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/blog/source/_posts/images/image-20230130152513088.png" alt="image-20230130152513088"></p>
-<p><a target="_blank" rel="noopener" href="https://issues.apache.org/jira/browse/SHIRO-903">https://issues.apache.org/jira/browse/SHIRO-903</a></p>
-<p>从上面链接可以看出只适配ant-style pattern，所以问题一定是出在了两者的匹配模式不同的问题上。</p>
-<p>PathPatternParser会循环删除;到/中的内容，比如localhost:9991/admin/xxx;xxx/;第一轮会被删除为/admin/xxx/;</p>
-<p>如果;后面没有/,那么就取;前面的内容，所以第二轮/admin/xxx/;调整为/admin/xxx/</p>
-<p><img src="/Users/huhuahua/%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/blog/source/_posts/images/image-20230130174921874.png" alt="image-20230130174921874"></p>
-<h4 id="AntPathMatcher和PathPatternParser解析差异"><a href="#AntPathMatcher和PathPatternParser解析差异" class="headerlink" title="AntPathMatcher和PathPatternParser解析差异"></a>AntPathMatcher和PathPatternParser解析差异</h4><p>针对一个规则/admin/abc*</p>
-<p>使用/admin/abcaaa去验证</p>
-<p>前面的admin的匹配就不用说了，两者之前没有区别。对于abcaaa来说，AntPathMatcher的匹配过程为先取*号前面的3位字符(在这个例子中，*号前面的字符有三个)，若有不相同的直接算匹配失败。再取*后面的几个字符，然后同样和我们发送的url的后面几个字符匹配，如果不相同算匹配失败，相同的话则匹配成功。</p>
-<p>而PathPatternParser是按照正则表达式来匹配的，将abc*变为\Qabc\E.* </p>
-<p>这样有个问题是加入我使用这种url访问：/admin/abc%0A</p>
-<p>%0A对于.*来说是访问不到的，而%0A对于Ant匹配方式来说没有影响，因为他验证的是%0A前面的几个字符</p>
-<p>但比较可惜的是，由于shiro默认限制了非ascii码字符，所以shiro中目前使用%0A会被拦截</p>
-<h3 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h3><p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/VaABqdK9E1U4gYKcRqlmng">https://mp.weixin.qq.com/s/VaABqdK9E1U4gYKcRqlmng</a></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-2.6-Release-Notes#upgrading-from-spring-boot-25">https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-2.6-Release-Notes#upgrading-from-spring-boot-25</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">漏洞分析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2023/01/30/Shiro%E8%BA%AB%E4%BB%BD%E7%BB%95%E8%BF%87%E6%BC%8F%E6%B4%9E-CVE-2023-22602-%E5%88%86%E6%9E%90/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
     <article id="post-JDK-Xalan的XSLT整数截断漏洞利用构造" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -901,6 +812,82 @@
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2021/11/11/Weblogic404%E5%86%85%E5%AD%98%E9%A9%AC/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-tomcat6、7、8、9内存马" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/10/11/tomcat6%E3%80%817%E3%80%818%E3%80%819%E5%86%85%E5%AD%98%E9%A9%AC/">tomcat6、7、8、9内存马</a>
+    </h1>
+  
+
+        
+        <a href="/2021/10/11/tomcat6%E3%80%817%E3%80%818%E3%80%819%E5%86%85%E5%AD%98%E9%A9%AC/" class="archive-article-date">
+  	<time datetime="2021-10-11T15:38:39.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-11</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>最近在学习java内存马，发现一个现象，目前网上写的tomcat内存马基本都是在tomcat7、8、9三个版本使用，对于tomcat6却很少有内存马的文章出现。这样就会造成不全面的情况，因为tomcat6其实在项目中还是能遇到很多的，如果遇到总不能放弃。因此决定研究一下。本篇文章研究的内存马类型仅限于filter类型内存马。</p>
+        
+          <a class="article-more-a" href="/2021/10/11/tomcat6%E3%80%817%E3%80%818%E3%80%819%E5%86%85%E5%AD%98%E9%A9%AC/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">java相关</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/10/11/tomcat6%E3%80%817%E3%80%818%E3%80%819%E5%86%85%E5%AD%98%E9%A9%AC/">展开全文 >></a>
         </p>
       
 
